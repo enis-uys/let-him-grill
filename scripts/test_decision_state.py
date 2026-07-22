@@ -137,6 +137,30 @@ class DecisionStateTest(unittest.TestCase):
             self.assertIn("data-option-toggle", fragment)
             self.assertIn("Recommended", fragment)
 
+    def test_rendered_action_uses_codex_follow_up_bridge_with_safe_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "state.json"
+            self.run_cli("init", str(state), "--title", "Test")
+            self.run_cli(
+                "add", str(state), "--id", "release", "--question", "Release?",
+                "--type", "review", "--option", "tag=Tag only", "--option", "page=Release page",
+                "--assessment", self.assessment("tag"),
+                "--assessment", self.assessment("page", "solid-alternative"),
+                "--choice", "tag",
+            )
+
+            rendered = Path(directory) / "tree.html"
+            self.run_cli("render", str(state), str(rendered))
+            fragment = rendered.read_text()
+
+            self.assertIn(f"const statePath = {json.dumps(str(state.resolve()))}", fragment)
+            self.assertIn('await window.openai.sendFollowUpMessage({ prompt, title: "Apply decision" })', fragment)
+            self.assertIn('feedback.textContent = "Decision sent to Codex."', fragment)
+            self.assertEqual(
+                fragment.count('feedback.textContent = `Codex connection failed. Copy this prompt: ${prompt}`'),
+                2,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
