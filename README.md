@@ -120,6 +120,7 @@ python3 scripts/test_decision_state.py
 ```
 
 The state engine uses only the Python standard library.
+See the [roadmap](docs/ROADMAP.md) for the prioritized path to the first release.
 
 ## License
 
