@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "title": "Let Him Grill",
   "nodes": [
     {
@@ -10,22 +10,26 @@
         {
           "id": "native",
           "label": "Native Codex visualization",
-          "description": "Embedded directly in the conversation without a separate process."
+          "description": "Embedded directly in the conversation without a separate process.",
+          "assessment": {"triage": "recommended", "reason": "It matches the Codex-native product goal.", "confidence": 0.94, "reversible": true, "effort": "low", "risk": "low", "impact": "No extra runtime or window.", "preferredWhen": "The workflow should stay inside Codex."}
         },
         {
           "id": "local",
           "label": "Local mini website",
-          "description": "A separate browser window with full control over presentation and state."
+          "description": "A separate browser window with full control over presentation and state.",
+          "assessment": {"triage": "solid-alternative", "reason": "It offers more UI control at the cost of another surface.", "confidence": 0.86, "reversible": true, "effort": "medium", "risk": "low", "impact": "Adds a separate local frontend.", "preferredWhen": "Codex inline UI is too constrained."}
         },
         {
           "id": "plugin",
           "label": "Plugin with MCP UI",
-          "description": "An installable integration for later distribution to multiple users."
+          "description": "An installable integration for later distribution to multiple users.",
+          "assessment": {"triage": "situational", "reason": "Distribution benefits do not justify plugin complexity yet.", "confidence": 0.89, "reversible": true, "effort": "high", "risk": "medium", "impact": "Adds packaging and integration maintenance.", "preferredWhen": "The workflow needs tools beyond a skill."}
         },
         {
           "id": "text",
           "label": "Markdown in chat",
-          "description": "The simplest option without interaction or visual status accents."
+          "description": "The simplest option without interaction or visual status accents.",
+          "assessment": {"triage": "not-recommended", "reason": "It cannot support switching branches interactively.", "confidence": 0.93, "reversible": true, "effort": "low", "risk": "low", "impact": "Loses the primary visual interaction.", "preferredWhen": "The host cannot render inline visuals."}
         }
       ],
       "choice": "native",
@@ -44,22 +48,26 @@
         {
           "id": "json",
           "label": "Workspace JSON",
-          "description": "Machine-readable, versionable, and explicit as the source of truth."
+          "description": "Machine-readable, versionable, and explicit as the source of truth.",
+          "assessment": {"triage": "recommended", "reason": "It is the smallest deterministic persistent format.", "confidence": 0.97, "reversible": true, "effort": "low", "risk": "low", "impact": "Keeps state inspectable in the workspace.", "preferredWhen": "One workspace owns the decision path."}
         },
         {
           "id": "markdown",
           "label": "Markdown document",
-          "description": "Easy to read but more error-prone for automatic state changes."
+          "description": "Easy to read but more error-prone for automatic state changes.",
+          "assessment": {"triage": "solid-alternative", "reason": "Readable output is useful but weak as mutable state.", "confidence": 0.88, "reversible": true, "effort": "low", "risk": "medium", "impact": "Parsing and updates become less reliable.", "preferredWhen": "Humans edit the state more often than tools."}
         },
         {
           "id": "sqlite",
           "label": "SQLite database",
-          "description": "Robust for many nodes and queries, but unnecessarily heavy for the MVP."
+          "description": "Robust for many nodes and queries, but unnecessarily heavy for the MVP.",
+          "assessment": {"triage": "situational", "reason": "Query power is unnecessary for small decision trees.", "confidence": 0.91, "reversible": true, "effort": "medium", "risk": "low", "impact": "Adds schema and migration work.", "preferredWhen": "Decision histories become large and query-heavy."}
         },
         {
           "id": "ui",
           "label": "Visualization only",
-          "description": "No extra storage, but unreliable across later tasks."
+          "description": "No extra storage, but unreliable across later tasks.",
+          "assessment": {"triage": "excluded", "reason": "It conflicts with the persistence requirement.", "confidence": 0.99, "reversible": false, "effort": "low", "risk": "high", "impact": "Decision history can be lost.", "preferredWhen": "Persistence is explicitly not required."}
         }
       ],
       "choice": "json",
@@ -80,17 +88,20 @@
         {
           "id": "wrapper",
           "label": "Dedicated orchestrator skill",
-          "description": "Extends the existing workflow without modifying its files."
+          "description": "Extends the existing workflow without modifying its files.",
+          "assessment": {"triage": "recommended", "reason": "It preserves upstream updates and keeps ownership clear.", "confidence": 0.96, "reversible": true, "effort": "low", "risk": "low", "impact": "Adds one focused orchestration layer.", "preferredWhen": "The original skill should remain untouched."}
         },
         {
           "id": "fork",
           "label": "Fork the existing skill",
-          "description": "Provides full control, but future updates must be merged manually."
+          "description": "Provides full control, but future updates must be merged manually.",
+          "assessment": {"triage": "not-recommended", "reason": "The maintenance cost outweighs current benefits.", "confidence": 0.94, "reversible": true, "effort": "medium", "risk": "medium", "impact": "Creates permanent upstream merge work.", "preferredWhen": "The original workflow must be changed deeply."}
         },
         {
           "id": "plugin",
           "label": "Bundle as a plugin",
-          "description": "Useful for broader distribution with UI and tools, but more work today."
+          "description": "Useful for broader distribution with UI and tools, but more work today.",
+          "assessment": {"triage": "situational", "reason": "A plugin is premature while a standalone skill is sufficient.", "confidence": 0.9, "reversible": true, "effort": "high", "risk": "medium", "impact": "Adds packaging and compatibility work.", "preferredWhen": "Native tools or richer installation become necessary."}
         }
       ],
       "choice": "wrapper",
@@ -111,22 +122,26 @@
         {
           "id": "material",
           "label": "Only for material decisions",
-          "description": "Stops for architecture, risk, cost, or consequences that are hard to reverse."
+          "description": "Stops for architecture, risk, cost, or consequences that are hard to reverse.",
+          "assessment": {"triage": "recommended", "reason": "It follows directly from the product promise.", "confidence": 1.0, "reversible": true, "effort": "low", "risk": "low", "impact": "Keeps autonomy without removing human control.", "preferredWhen": "Human attention should be reserved for consequential choices."}
         },
         {
           "id": "every",
           "label": "After every question",
-          "description": "Provides maximum control but preserves the slow original workflow."
+          "description": "Provides maximum control but preserves the slow original workflow.",
+          "assessment": {"triage": "excluded", "reason": "It contradicts the goal of reducing interruptions.", "confidence": 0.99, "reversible": true, "effort": "low", "risk": "low", "impact": "Removes the main workflow improvement.", "preferredWhen": "The user explicitly requests manual step-by-step control."}
         },
         {
           "id": "confidence",
           "label": "Below a confidence threshold",
-          "description": "Easy to automate, but does not account well for risk or reversibility."
+          "description": "Easy to automate, but does not account well for risk or reversibility.",
+          "assessment": {"triage": "not-recommended", "reason": "Confidence alone is not a safe autonomy boundary.", "confidence": 0.97, "reversible": true, "effort": "low", "risk": "high", "impact": "High-confidence guesses could cross human gates.", "preferredWhen": "It is combined with explicit risk and reversibility rules."}
         },
         {
           "id": "phase",
           "label": "Only at phase boundaries",
-          "description": "Creates a predictable rhythm but may surface important decisions too late."
+          "description": "Creates a predictable rhythm but may surface important decisions too late.",
+          "assessment": {"triage": "situational", "reason": "Phase boundaries do not reliably match decision risk.", "confidence": 0.9, "reversible": true, "effort": "low", "risk": "medium", "impact": "Important choices may be delayed.", "preferredWhen": "The process already has strict review phases."}
         }
       ],
       "choice": "material",

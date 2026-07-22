@@ -9,12 +9,13 @@ user only when a choice materially changes the outcome.
 
 ## 1. Complete the core workflow
 
-- [ ] Implement decision and option triage from
+- [x] Implement decision and option triage from
       [ticket 001](tickets/001-decision-and-option-triage.md).
-- [ ] Persist triage results in the shared state used by compact and visual modes.
-- [ ] Auto-select a clearly superior low-risk option.
-- [ ] Create a human gate for meaningful trade-offs.
-- [ ] Reassess dependent decisions after an earlier choice changes.
+- [x] Use the same triage model in compact and visual modes; persist it whenever
+      state is materialized.
+- [x] Auto-select a clearly superior low-risk option.
+- [x] Create a human gate for meaningful trade-offs.
+- [x] Reassess dependent decisions after an earlier choice changes.
 
 Done when one realistic workflow resolves several decisions autonomously, stops
 at a genuine human gate, and correctly rebuilds an affected branch after a

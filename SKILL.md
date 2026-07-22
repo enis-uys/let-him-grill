@@ -1,6 +1,6 @@
 ---
 name: let-him-grill
-description: Stress-test a plan or design with project evidence, automatically resolve reversible low-risk decisions, and pause at genuine human decision gates. Supports compact text-first and visual persistent-tree modes. Use when the user invokes interactive or autonomous Grill with Docs, wants fewer step-by-step interruptions, asks to explore branches until human judgment is required, or wants to revisit earlier recommendations.
+description: Stress-test a plan or design with project evidence, triage decisions and their options, automatically resolve reversible low-risk choices, and pause at genuine human decision gates. Supports compact text-first and visual persistent-tree modes. Use when the user invokes interactive or autonomous Grill with Docs, wants fewer step-by-step interruptions, asks to explore branches until human judgment is required, or wants to revisit earlier recommendations.
 ---
 
 # Let Him Grill
@@ -35,8 +35,10 @@ switching to `compact` keeps existing state but stops automatic rendering.
 2. Select the mode. In `visual`, create `.grill/decisions.json` with
    `decision_state.py init` if no active state exists. In `compact`, keep the
    path in the conversation until persistence is useful.
-3. Build the next decision and its options. Give a recommendation for every
-   question.
+3. Build the next decision and 2–4 real options. Assess every option as
+   `recommended`, `solid-alternative`, `situational`, `not-recommended`, or
+   `excluded`. Record a short reason, confidence, reversibility, effort, risk,
+   downstream impact, and when the option becomes preferable.
 4. Classify it:
    - `auto`: one option follows from evidence, is low-risk, and is cheap to
      reverse. Choose it and continue.
@@ -46,8 +48,13 @@ switching to `compact` keeps existing state but stops automatic rendering.
      cost, provider lock-in, operations, or another hard-to-reverse outcome.
      Stop before choosing.
    - `derived`: choice is forced by an earlier confirmed decision.
-5. Continue across `auto`, `review`, and `derived` nodes until reaching `human`
-   or shared understanding. In `visual`, add each decision with
+   - `blocked`: required evidence is missing and guessing could materially
+     change the result. Stop and request only that evidence.
+   Use `human` when similarly strong options carry a meaningful trade-off.
+5. Continue across `auto`, `review`, and `derived` nodes until reaching `human`,
+   `blocked`, or shared understanding. For `auto`, allow the script to choose
+   only when exactly one `recommended` option is low-risk and reversible. In
+   `visual`, add each decision with
    `decision_state.py add`.
 6. In `compact`, present the human gate as concise text. In `visual`, render the
    state into the task's writable Codex visualization directory with
@@ -75,6 +82,8 @@ Stop when any answer is yes:
 
 Confidence alone never authorizes an automatic choice. Risk and reversibility
 take priority.
+Never select an `excluded` option. Reassess it only after its conflicting
+requirement changes.
 
 ## Commands
 
@@ -92,11 +101,11 @@ python3 <skill-dir>/scripts/decision_state.py init \
 
 python3 <skill-dir>/scripts/decision_state.py add \
   .grill/decisions.json --id storage --question "How store state?" \
-  --type review \
+  --type auto \
   --option local-json="Local JSON::Portable and easy to inspect" \
   --option sqlite="SQLite::Useful for larger queryable state" \
-  --choice local-json --reason "No service required" --confidence 0.88 \
-  --reversible
+  --assessment 'local-json={"triage":"recommended","reason":"No service required","confidence":0.94,"reversible":true,"effort":"low","risk":"low","impact":"Keeps state local","preferredWhen":"One workspace owns the plan"}' \
+  --assessment 'sqlite={"triage":"situational","reason":"Adds query support","confidence":0.86,"reversible":true,"effort":"medium","risk":"low","impact":"Adds schema maintenance","preferredWhen":"The tree needs complex queries"}'
 
 python3 <skill-dir>/scripts/decision_state.py choose \
   .grill/decisions.json storage sqlite --actor human
@@ -116,6 +125,8 @@ invalidated node with refreshed options or reasoning.
 - Treat `.grill/decisions.json` as source of truth; the visualization is a view.
 - Never silently overwrite a confirmed human choice.
 - Reusing an invalidated recommendation requires fresh evidence.
+- Replace invalidated nodes with fresh option assessments; do not reuse stale
+  option triage.
 - Keep reasons factual and short. Record uncertainty explicitly.
 - In `visual`, render a new visualization after every persisted change; old
   responses remain historical snapshots.
