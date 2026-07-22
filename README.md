@@ -1,4 +1,4 @@
-# Grill with Docs Interactive
+# Let Him Grill
 
 An autonomous, evidence-first extension of the Grill with Docs workflow for
 Codex. It resolves safe, reversible decisions on its own and stops when human
@@ -28,16 +28,16 @@ Available in every Codex project for the current user:
 
 ```bash
 mkdir -p ~/.agents/skills
-git clone https://github.com/enis-uys/grill-with-docs-interactive.git \
-  ~/.agents/skills/grill-with-docs-interactive
+git clone https://github.com/enis-uys/let-him-grill.git \
+  ~/.agents/skills/let-him-grill
 ```
 
 PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.agents\skills" | Out-Null
-git clone https://github.com/enis-uys/grill-with-docs-interactive.git `
-  "$HOME\.agents\skills\grill-with-docs-interactive"
+git clone https://github.com/enis-uys/let-him-grill.git `
+  "$HOME\.agents\skills\let-him-grill"
 ```
 
 ### Project-local installation
@@ -46,8 +46,8 @@ Version the skill with one repository:
 
 ```bash
 mkdir -p .agents/skills
-git submodule add https://github.com/enis-uys/grill-with-docs-interactive.git \
-  .agents/skills/grill-with-docs-interactive
+git submodule add https://github.com/enis-uys/let-him-grill.git \
+  .agents/skills/let-him-grill
 ```
 
 Start a new Codex task after installation so the skill is discovered.
@@ -60,7 +60,7 @@ Text-first. State and visualization are created only when branching or revisitin
 decisions makes them useful.
 
 ```text
-Use $grill-with-docs-interactive in compact mode to stress-test this plan.
+Use $let-him-grill in compact mode to stress-test this plan.
 Continue autonomously until my decision is required.
 ```
 
@@ -70,14 +70,14 @@ Persists decisions in `.grill/decisions.json` and shows the interactive tree at
 human gates and after changes.
 
 ```text
-Use $grill-with-docs-interactive in visual mode to stress-test this plan.
+Use $let-him-grill in visual mode to stress-test this plan.
 Continue autonomously until my decision is required.
 ```
 
 ### Automatic mode selection
 
 ```text
-Use $grill-with-docs-interactive in the best fitting mode to stress-test this
+Use $let-him-grill in the best fitting mode to stress-test this
 plan until my decision is required.
 ```
 
@@ -101,14 +101,14 @@ inline visualization support fall back to the same decision content as text.
 Global installation:
 
 ```bash
-git -C ~/.agents/skills/grill-with-docs-interactive pull --ff-only
+git -C ~/.agents/skills/let-him-grill pull --ff-only
 ```
 
 Project-local submodule:
 
 ```bash
 git submodule update --remote --merge \
-  .agents/skills/grill-with-docs-interactive
+  .agents/skills/let-him-grill
 ```
 
 ## Development

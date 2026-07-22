@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Persist and render an interactive Grill with Docs decision graph."""
+"""Persist and render a Let Him Grill decision graph."""
 
 from __future__ import annotations
 
@@ -300,7 +300,7 @@ def render_html(state: dict, state_path: Path) -> str:
         if (!selected) return;
         const node = nodes[selected.node];
         const option = node.options.find((item) => item.id === selected.option);
-        const prompt = `Use $grill-with-docs-interactive. Apply decision "${{node.question}}" = "${{option.label}}" (node ${{selected.node}}, option ${{selected.option}}) to ${{statePath}}, reassess invalidated descendants, continue to the next human gate, and render the updated tree.`;
+        const prompt = `Use $let-him-grill. Apply decision "${{node.question}}" = "${{option.label}}" (node ${{selected.node}}, option ${{selected.option}}) to ${{statePath}}, reassess invalidated descendants, continue to the next human gate, and render the updated tree.`;
         if (window.openai?.sendFollowUpMessage) {{
           await window.openai.sendFollowUpMessage({{ prompt, title: "Entscheidung anwenden" }});
         }} else {{
