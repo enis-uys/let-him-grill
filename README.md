@@ -15,8 +15,10 @@ judgment materially changes the outcome.
 - invalidates dependent decisions when an earlier choice changes
 - supports compact text output and a persistent interactive decision tree
 
-Inspired by Matt Pocock's Grill with Docs workflow. This project is independent
-and not affiliated with Matt Pocock or OpenAI.
+Inspired by Matt Pocock's
+[Grill with Docs](https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs)
+workflow. Let Him Grill is an independent project and is not affiliated with or
+endorsed by Matt Pocock or OpenAI.
 
 ## Install
 
