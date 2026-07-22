@@ -407,9 +407,15 @@ def render_html(state: dict, state_path: Path) -> str:
         const option = node.options.find((item) => item.id === selected.option);
         const prompt = `Use $let-him-grill. Apply decision "${{node.question}}" = "${{option.label}}" (node ${{selected.node}}, option ${{selected.option}}) to ${{statePath}}, reassess invalidated descendants, continue to the next human gate, and render the updated tree.`;
         if (window.openai?.sendFollowUpMessage) {{
-          await window.openai.sendFollowUpMessage({{ prompt, title: "Apply decision" }});
+          try {{
+            const result = await window.openai.sendFollowUpMessage({{ prompt, title: "Apply decision" }});
+            if (result?.isError) throw new Error("Codex rejected the follow-up message.");
+            feedback.textContent = "Decision sent to Codex.";
+          }} catch {{
+            feedback.textContent = `Codex connection failed. Copy this prompt: ${{prompt}}`;
+          }}
         }} else {{
-          feedback.textContent = prompt;
+          feedback.textContent = `Codex connection failed. Copy this prompt: ${{prompt}}`;
         }}
       }});
     }})();

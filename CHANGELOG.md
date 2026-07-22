@@ -22,6 +22,9 @@ All notable user-facing changes to Let Him Grill are recorded here.
 
 ### Changed
 
+- The interactive tree now confirms successful Codex follow-up delivery and
+  preserves the complete prompt when the host bridge is unavailable or rejects
+  the request.
 - Added the verified one-line `skills` CLI installation as the primary setup
   path, while retaining Git installation as a fallback.
 - State format moved to version 2; version 1 state is intentionally unsupported
