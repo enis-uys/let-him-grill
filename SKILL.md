@@ -1,9 +1,9 @@
 ---
-name: grill-with-docs-interactive
+name: let-him-grill
 description: Stress-test a plan or design with project evidence, automatically resolve reversible low-risk decisions, and pause at genuine human decision gates. Supports compact text-first and visual persistent-tree modes. Use when the user invokes interactive or autonomous Grill with Docs, wants fewer step-by-step interruptions, asks to explore branches until human judgment is required, or wants to revisit earlier recommendations.
 ---
 
-# Grill with Docs Interactive
+# Let Him Grill
 
 Extend `grilling` and `domain-modeling`; do not modify them. Preserve their
 evidence-first behavior and documentation rules while batching decisions that do

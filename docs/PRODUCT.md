@@ -1,4 +1,4 @@
-# Produktkonzept: Grill with Docs Interactive
+# Produktkonzept: Let Him Grill
 
 ## Problem
 

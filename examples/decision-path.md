@@ -1,4 +1,4 @@
-# Grill with Docs Interactive
+# Let Him Grill
 
 ## Wo lebt der Entscheidungsbaum?
 
