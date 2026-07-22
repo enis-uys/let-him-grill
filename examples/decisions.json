@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "title": "Grill with Docs Interactive",
+  "nodes": [
+    {
+      "id": "surface",
+      "question": "Wo lebt der Entscheidungsbaum?",
+      "type": "human",
+      "options": [
+        {
+          "id": "native",
+          "label": "Native Codex-Visualisierung",
+          "description": "Direkt im Chat eingebettet und ohne separaten Prozess."
+        },
+        {
+          "id": "local",
+          "label": "Lokale Mini-Website",
+          "description": "Eigenes Browserfenster mit voller Kontrolle über Darstellung und Zustand."
+        },
+        {
+          "id": "plugin",
+          "label": "Plugin mit MCP-UI",
+          "description": "Installierbare Integration für spätere Verteilung an mehrere Nutzer."
+        },
+        {
+          "id": "text",
+          "label": "Markdown im Chat",
+          "description": "Einfachste Variante ohne Interaktion oder farbliche Darstellung."
+        }
+      ],
+      "choice": "native",
+      "reason": "Direkt im Chat, ohne Server oder zusätzliches Frontend.",
+      "confidence": 0.94,
+      "reversible": true,
+      "dependsOn": [],
+      "status": "confirmed",
+      "actor": "human"
+    },
+    {
+      "id": "state",
+      "question": "Wo bleibt der dauerhafte Zustand?",
+      "type": "review",
+      "options": [
+        {
+          "id": "json",
+          "label": "Workspace-JSON",
+          "description": "Maschinenlesbar, versionierbar und eindeutig als Source of Truth."
+        },
+        {
+          "id": "markdown",
+          "label": "Markdown-Dokument",
+          "description": "Gut lesbar, aber fehleranfälliger für automatische Zustandsänderungen."
+        },
+        {
+          "id": "sqlite",
+          "label": "SQLite-Datei",
+          "description": "Robust für viele Knoten und Abfragen, für den MVP unnötig schwer."
+        },
+        {
+          "id": "ui",
+          "label": "Nur in der Visualisierung",
+          "description": "Kein zusätzlicher Speicher, aber nach einem neuen Turn nicht zuverlässig."
+        }
+      ],
+      "choice": "json",
+      "reason": "Die Visualisierung bleibt eine austauschbare Ansicht.",
+      "confidence": 0.97,
+      "reversible": true,
+      "dependsOn": [
+        "surface"
+      ],
+      "status": "recommended",
+      "actor": "ai"
+    },
+    {
+      "id": "integration",
+      "question": "Wie wird Grill with Docs erweitert?",
+      "type": "review",
+      "options": [
+        {
+          "id": "wrapper",
+          "label": "Eigener Orchestrator-Skill",
+          "description": "Ergänzt den vorhandenen Ablauf, ohne dessen Dateien zu verändern."
+        },
+        {
+          "id": "fork",
+          "label": "Bestehenden Skill forken",
+          "description": "Volle Kontrolle, aber spätere Updates müssen manuell übernommen werden."
+        },
+        {
+          "id": "plugin",
+          "label": "Als Plugin bündeln",
+          "description": "Sinnvoll für Verteilung mit UI und weiteren Werkzeugen, aktuell mehr Aufwand."
+        }
+      ],
+      "choice": "wrapper",
+      "reason": "Der Original-Skill bleibt unverändert und weiter aktualisierbar.",
+      "confidence": 0.96,
+      "reversible": true,
+      "dependsOn": [
+        "surface"
+      ],
+      "status": "recommended",
+      "actor": "ai"
+    },
+    {
+      "id": "gate",
+      "question": "Wann hält der Workflow an?",
+      "type": "derived",
+      "options": [
+        {
+          "id": "material",
+          "label": "Nur bei wesentlichen Entscheidungen",
+          "description": "Stoppt bei Architektur, Risiko, Kosten oder schwer reversiblen Folgen."
+        },
+        {
+          "id": "every",
+          "label": "Nach jeder Frage",
+          "description": "Maximale Kontrolle, behält aber den langsamen ursprünglichen Ablauf."
+        },
+        {
+          "id": "confidence",
+          "label": "Unter einem Sicherheitswert",
+          "description": "Leicht automatisierbar, berücksichtigt Risiko und Reversibilität aber schlecht."
+        },
+        {
+          "id": "phase",
+          "label": "Nur an Phasengrenzen",
+          "description": "Planbarer Rhythmus, kann notwendige Entscheidungen zu spät sichtbar machen."
+        }
+      ],
+      "choice": "material",
+      "reason": "Folgt direkt aus dem Produktziel.",
+      "confidence": 1.0,
+      "reversible": true,
+      "dependsOn": [
+        "state",
+        "integration"
+      ],
+      "status": "derived",
+      "actor": "ai"
+    }
+  ]
+}
