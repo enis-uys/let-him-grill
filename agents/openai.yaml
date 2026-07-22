@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grill with Docs Interactive"
+  short_description: "Compact or visual decisions with human gates"
+  default_prompt: "Use $grill-with-docs-interactive in the best fitting compact or visual mode to stress-test this idea until my decision is required."
