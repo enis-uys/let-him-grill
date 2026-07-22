@@ -10,6 +10,7 @@ judgment materially changes the outcome.
 
 - researches repository code and documentation before asking questions
 - recommends an answer for every real decision
+- triages every option by fit, risk, effort, and reversibility
 - continues through reversible, low-risk choices automatically
 - stops at architecture, product, security, cost, and other human gates
 - invalidates dependent decisions when an earlier choice changes

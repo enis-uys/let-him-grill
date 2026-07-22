@@ -1,6 +1,6 @@
 # Decision and option triage
 
-Status: Backlog
+Status: Done
 
 ## Goal
 
@@ -8,9 +8,9 @@ Let Him Grill should triage both decisions and their options before interrupting
 
 ## Decision triage
 
-- `autopilot`: reversible and low-impact; Codex chooses and continues.
+- `auto`: reversible and low-impact; Codex chooses and continues.
 - `review`: Codex chooses provisionally and flags it for later review.
-- `human-gate`: architecture, cost, security, or difficult-to-reverse impact; stop for input.
+- `human`: architecture, cost, security, or difficult-to-reverse impact; stop for input.
 - `blocked`: required information is missing.
 
 Consider dependencies and the cost of changing the decision later, not only the decision in isolation.

@@ -47,6 +47,7 @@ können.
 - `review`: KI wählt vorläufig; Mensch kann die Wahl später ändern.
 - `human`: Workflow hält vor der Entscheidung an.
 - `derived`: Ergebnis folgt aus bereits getroffenen Entscheidungen.
+- `blocked`: Notwendige Fakten fehlen; der Workflow fordert nur diese an.
 
 Eine Frage braucht eine menschliche Entscheidung, wenn sie mindestens einen
 dieser Bereiche wesentlich verändert:
@@ -72,7 +73,20 @@ Mindestens erforderlich:
   "question": "Wie wird der Zustand gespeichert?",
   "type": "review",
   "choice": "local-json",
-  "options": ["local-json", "sqlite", "cloud"],
+  "options": [{
+    "id": "local-json",
+    "label": "Local JSON",
+    "assessment": {
+      "triage": "recommended",
+      "reason": "Kein Dienst erforderlich.",
+      "confidence": 0.94,
+      "reversible": true,
+      "effort": "low",
+      "risk": "low",
+      "impact": "Zustand bleibt lokal.",
+      "preferredWhen": "Ein Workspace besitzt den Plan."
+    }
+  }],
   "reason": "Kein Mehrbenutzerbetrieb oder Server erforderlich.",
   "confidence": 0.88,
   "reversible": true,

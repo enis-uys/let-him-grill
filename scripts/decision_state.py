@@ -10,8 +10,17 @@ import sys
 from pathlib import Path
 
 
-TYPES = {"auto", "review", "human", "derived"}
+TYPES = {"auto", "review", "human", "derived", "blocked"}
 STATUSES = {"recommended", "confirmed", "pending", "derived", "invalidated"}
+OPTION_TRIAGES = {
+    "recommended",
+    "solid-alternative",
+    "situational",
+    "not-recommended",
+    "excluded",
+}
+LEVELS = {"low", "medium", "high"}
+STATE_VERSION = 2
 
 
 def load(path: Path) -> dict:
@@ -30,8 +39,8 @@ def save(path: Path, state: dict) -> None:
 
 
 def validate(state: dict) -> None:
-    if state.get("version") != 1 or not isinstance(state.get("nodes"), list):
-        raise SystemExit("Invalid state: expected version 1 and nodes list")
+    if state.get("version") != STATE_VERSION or not isinstance(state.get("nodes"), list):
+        raise SystemExit(f"Invalid state: expected version {STATE_VERSION} and nodes list")
     ids = [node.get("id") for node in state["nodes"]]
     if any(not value for value in ids) or len(ids) != len(set(ids)):
         raise SystemExit("Invalid state: node IDs must be unique and non-empty")
@@ -49,6 +58,21 @@ def validate(state: dict) -> None:
             raise SystemExit(f"Invalid options on node {node['id']}")
         if node.get("choice") is not None and node["choice"] not in option_ids:
             raise SystemExit(f"Unknown choice on node {node['id']}")
+        for option in options:
+            assessment = option.get("assessment")
+            if not isinstance(assessment, dict):
+                raise SystemExit(f"Missing assessment on option {option.get('id')}")
+            if assessment.get("triage") not in OPTION_TRIAGES:
+                raise SystemExit(f"Invalid triage on option {option['id']}")
+            if assessment.get("risk") not in LEVELS or assessment.get("effort") not in LEVELS:
+                raise SystemExit(f"Invalid risk or effort on option {option['id']}")
+            if not isinstance(assessment.get("reversible"), bool):
+                raise SystemExit(f"Invalid reversibility on option {option['id']}")
+            if not all(isinstance(assessment.get(key), str) and assessment[key] for key in ("reason", "impact", "preferredWhen")):
+                raise SystemExit(f"Incomplete assessment on option {option['id']}")
+            option_confidence = assessment.get("confidence")
+            if not isinstance(option_confidence, (int, float)) or not 0 <= option_confidence <= 1:
+                raise SystemExit(f"Invalid confidence on option {option['id']}")
         if not set(node.get("dependsOn", [])) <= known - {node["id"]}:
             raise SystemExit(f"Unknown or self dependency on node {node['id']}")
         confidence = node.get("confidence")
@@ -67,6 +91,19 @@ def parse_option(value: str) -> dict:
     return option
 
 
+def parse_assessment(value: str) -> tuple[str, dict]:
+    option_id, separator, payload = value.partition("=")
+    if not separator or not option_id.strip():
+        raise argparse.ArgumentTypeError("assessment must be option-id={JSON}")
+    try:
+        assessment = json.loads(payload)
+    except json.JSONDecodeError as error:
+        raise argparse.ArgumentTypeError(f"invalid assessment JSON: {error.msg}") from error
+    if not isinstance(assessment, dict):
+        raise argparse.ArgumentTypeError("assessment JSON must be an object")
+    return option_id.strip(), assessment
+
+
 def initial_status(node_type: str, choice: str | None) -> str:
     if node_type == "human" and choice is None:
         return "pending"
@@ -79,7 +116,7 @@ def command_init(args: argparse.Namespace) -> None:
     path = Path(args.state)
     if path.exists() and not args.force:
         raise SystemExit(f"State already exists: {path}; use --force to replace")
-    save(path, {"version": 1, "title": args.title, "nodes": []})
+    save(path, {"version": STATE_VERSION, "title": args.title, "nodes": []})
 
 
 def command_add(args: argparse.Namespace) -> None:
@@ -88,21 +125,47 @@ def command_add(args: argparse.Namespace) -> None:
     existing = next((node for node in state["nodes"] if node["id"] == args.id), None)
     if existing and not args.replace:
         raise SystemExit(f"Node already exists: {args.id}; use --replace")
+    assessments = dict(args.assessment)
+    option_ids = {option["id"] for option in args.option}
+    if set(assessments) != option_ids:
+        raise SystemExit("Provide exactly one --assessment for every option")
+    options = [option | {"assessment": assessments[option["id"]]} for option in args.option]
+    choice = args.choice
+    if args.type == "auto" and choice is None:
+        safe = [
+            option for option in options
+            if option["assessment"]["triage"] == "recommended"
+            and option["assessment"]["risk"] == "low"
+            and option["assessment"]["reversible"] is True
+        ]
+        if len(safe) == 1:
+            choice = safe[0]["id"]
+        else:
+            raise SystemExit("An auto decision requires exactly one low-risk reversible recommendation")
+    if choice:
+        selected = next((option for option in options if option["id"] == choice), None)
+        if selected is None:
+            raise SystemExit(f"Unknown choice on node {args.id}: {choice}")
+        selected_assessment = selected["assessment"]
+        if selected_assessment["triage"] == "excluded":
+            raise SystemExit("Refusing to auto-select an excluded option")
+    else:
+        selected_assessment = None
     node = {
         "id": args.id,
         "question": args.question,
         "type": args.type,
-        "options": args.option,
-        "choice": args.choice,
+        "options": options,
+        "choice": choice,
         "reason": args.reason,
-        "confidence": args.confidence,
-        "reversible": args.reversible,
+        "confidence": args.confidence if args.confidence is not None else selected_assessment and selected_assessment["confidence"],
+        "reversible": args.reversible or bool(selected_assessment and selected_assessment["reversible"]),
         "dependsOn": args.depends_on,
-        "status": initial_status(args.type, args.choice),
-        "actor": "ai" if args.choice else None,
+        "status": initial_status(args.type, choice),
+        "actor": "ai" if choice else None,
     }
     if existing:
-        if existing.get("actor") == "human" and existing.get("choice") != args.choice:
+        if existing.get("actor") == "human" and existing.get("choice") != choice:
             raise SystemExit("Refusing to overwrite a confirmed human choice; use choose")
         state["nodes"][state["nodes"].index(existing)] = node
     else:
@@ -133,6 +196,11 @@ def command_choose(args: argparse.Namespace) -> None:
         raise SystemExit(f"Unknown node: {args.node}")
     if args.option not in {option["id"] for option in node["options"]}:
         raise SystemExit(f"Unknown option for {args.node}: {args.option}")
+    selected = next(option for option in node["options"] if option["id"] == args.option)
+    if selected["assessment"].get("status") == "invalidated":
+        raise SystemExit("Refusing to select a stale option; reassess the node first")
+    if selected["assessment"]["triage"] == "excluded":
+        raise SystemExit("Refusing to select an excluded option; reassess it first")
     changed = node.get("choice") != args.option
     node["choice"] = args.option
     node["actor"] = args.actor
@@ -145,6 +213,8 @@ def command_choose(args: argparse.Namespace) -> None:
                 item["status"] = "invalidated"
                 item["reason"] = "Earlier dependency changed; reassessment required."
                 item["confidence"] = None
+                for option in item["options"]:
+                    option["assessment"]["status"] = "invalidated"
     save(path, state)
 
 
@@ -162,18 +232,47 @@ def render_node(node: dict) -> str:
         "review": "Review",
         "human": "Decision required",
         "derived": "Derived",
+        "blocked": "Blocked",
     }
     color = {
         "auto": "var(--viz-series-1)",
         "review": "var(--viz-series-2)",
         "human": "var(--destructive)",
         "derived": "var(--muted-foreground)",
+        "blocked": "var(--destructive)",
     }[node["type"]]
+    triage_labels = {
+        "recommended": "Recommended",
+        "solid-alternative": "Solid alternative",
+        "situational": "Situational",
+        "not-recommended": "Not recommended",
+        "excluded": "Excluded",
+    }
+    triage_colors = {
+        "recommended": "var(--viz-series-1)",
+        "solid-alternative": "var(--viz-series-2)",
+        "situational": "var(--viz-series-3)",
+        "not-recommended": "var(--destructive)",
+        "excluded": "var(--muted-foreground)",
+    }
     option_buttons = []
     for option in node["options"]:
         selected = option["id"] == node.get("choice")
         label = html.escape(option["label"])
         description = html.escape(option.get("description") or "No additional description.")
+        assessment = option["assessment"]
+        excluded = assessment["triage"] == "excluded"
+        triage = "Needs reassessment" if assessment.get("status") == "invalidated" else triage_labels[assessment["triage"]]
+        triage_color = "var(--muted-foreground)" if assessment.get("status") == "invalidated" else triage_colors[assessment["triage"]]
+        assessment_details = (
+            f'<p>{description}</p>'
+            f'<p>{html.escape(assessment["reason"])}</p>'
+            f'<p class="text-small text-muted">Confidence: {round(assessment["confidence"] * 100)}% · '
+            f'Risk: {html.escape(assessment["risk"])} · Effort: {html.escape(assessment["effort"])} · '
+            f'{"easy to reverse" if assessment["reversible"] else "hard to reverse"}</p>'
+            f'<p class="text-small text-muted">Impact: {html.escape(assessment["impact"])} · '
+            f'Prefer when: {html.escape(assessment["preferredWhen"])}</p>'
+        )
         control_id = html.escape(f"gwd-{node['id']}-{option['id']}")
         description_id = f"{control_id}-description"
         option_buttons.append(
@@ -181,12 +280,15 @@ def render_node(node: dict) -> str:
             f'<input id="{control_id}" type="radio" class="form-check-input" name="gwd-{html.escape(node["id"])}" '
             f'data-node="{html.escape(node["id"])}" data-option="{html.escape(option["id"])}"'
             f' aria-label="Select option: {label}"'
+            f'{" disabled" if excluded else ""}'
             f'{" checked" if selected else ""}>'
-            f'<label class="form-check-label gwd-option-title" for="{control_id}">{label}</label>'
+            f'<label class="form-check-label gwd-option-title" for="{control_id}">{label} '
+            f'<span class="text-small text-muted gwd-option-triage"><span class="gwd-option-dot" '
+            f'style="--gwd-option-color: {triage_color}" aria-hidden="true"></span>{triage}</span></label>'
             f'<button type="button" class="btn btn-ghost gwd-option-toggle" '
             f'data-option-toggle aria-expanded="false" aria-controls="{description_id}" '
             f'aria-label="Show description for {label}"><span class="gwd-chevron" aria-hidden="true">›</span></button>'
-            f'<p id="{description_id}" class="text-small text-muted gwd-option-description" data-option-description hidden>{description}</p>'
+            f'<div id="{description_id}" class="gwd-option-description" data-option-description hidden>{assessment_details}</div>'
             f'</div>'
         )
     confidence = node.get("confidence")
@@ -206,7 +308,7 @@ def render_node(node: dict) -> str:
                 <p class="text-small text-muted">Selection: {html.escape(option_label(node))} · {confidence_text} · {reversibility} · Dependencies: {html.escape(dependencies)}</p>
               </div>
             </details>
-            <span class="gwd-status"><span class="gwd-status-dot" aria-hidden="true"></span>{status_labels[node['type']]}</span>
+            <span class="gwd-status"><span class="gwd-status-dot" aria-hidden="true"></span>{"Needs reassessment" if node["status"] == "invalidated" else status_labels[node['type']]}</span>
           </div>
           <div class="viz-grid gwd-options">{''.join(option_buttons)}</div>
         </div>
@@ -240,10 +342,13 @@ def render_html(state: dict, state_path: Path) -> str:
     #{root_id} .gwd-options {{ margin-top: 12px; }}
     #{root_id} .gwd-option {{ display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; min-width: 0; }}
     #{root_id} .gwd-option-title {{ cursor: pointer; }}
+    #{root_id} .gwd-option-triage {{ display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }}
+    #{root_id} .gwd-option-dot {{ width: 6px; height: 6px; border-radius: 50%; background: var(--gwd-option-color); }}
     #{root_id} .gwd-option-toggle {{ align-self: center; }}
     #{root_id} .gwd-chevron {{ display: inline-block; transform: scale(1.3); transition: transform 120ms ease; }}
     #{root_id} .gwd-option-toggle[aria-expanded="true"] .gwd-chevron {{ transform: rotate(90deg) scale(1.3); }}
     #{root_id} .gwd-option-description {{ grid-column: 2 / -1; margin: 2px 0 0; }}
+    #{root_id} .gwd-option-description p {{ margin: 0 0 6px; }}
     #{root_id} .gwd-actions {{ justify-content: flex-end; }}
     @media (max-width: 480px) {{
       #{root_id} .gwd-node {{ grid-template-columns: 18px 1fr; }}
@@ -356,6 +461,7 @@ def parser() -> argparse.ArgumentParser:
     add.add_argument("--question", required=True)
     add.add_argument("--type", choices=sorted(TYPES), required=True)
     add.add_argument("--option", action="append", type=parse_option, required=True)
+    add.add_argument("--assessment", action="append", type=parse_assessment, required=True)
     add.add_argument("--choice")
     add.add_argument("--reason")
     add.add_argument("--confidence", type=float)
