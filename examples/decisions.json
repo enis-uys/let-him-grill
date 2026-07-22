@@ -4,32 +4,32 @@
   "nodes": [
     {
       "id": "surface",
-      "question": "Wo lebt der Entscheidungsbaum?",
+      "question": "Where should the decision tree live?",
       "type": "human",
       "options": [
         {
           "id": "native",
-          "label": "Native Codex-Visualisierung",
-          "description": "Direkt im Chat eingebettet und ohne separaten Prozess."
+          "label": "Native Codex visualization",
+          "description": "Embedded directly in the conversation without a separate process."
         },
         {
           "id": "local",
-          "label": "Lokale Mini-Website",
-          "description": "Eigenes Browserfenster mit voller Kontrolle über Darstellung und Zustand."
+          "label": "Local mini website",
+          "description": "A separate browser window with full control over presentation and state."
         },
         {
           "id": "plugin",
-          "label": "Plugin mit MCP-UI",
-          "description": "Installierbare Integration für spätere Verteilung an mehrere Nutzer."
+          "label": "Plugin with MCP UI",
+          "description": "An installable integration for later distribution to multiple users."
         },
         {
           "id": "text",
-          "label": "Markdown im Chat",
-          "description": "Einfachste Variante ohne Interaktion oder farbliche Darstellung."
+          "label": "Markdown in chat",
+          "description": "The simplest option without interaction or visual status accents."
         }
       ],
       "choice": "native",
-      "reason": "Direkt im Chat, ohne Server oder zusätzliches Frontend.",
+      "reason": "It stays in the conversation without a server or separate frontend.",
       "confidence": 0.94,
       "reversible": true,
       "dependsOn": [],
@@ -38,32 +38,32 @@
     },
     {
       "id": "state",
-      "question": "Wo bleibt der dauerhafte Zustand?",
+      "question": "Where should persistent state live?",
       "type": "review",
       "options": [
         {
           "id": "json",
-          "label": "Workspace-JSON",
-          "description": "Maschinenlesbar, versionierbar und eindeutig als Source of Truth."
+          "label": "Workspace JSON",
+          "description": "Machine-readable, versionable, and explicit as the source of truth."
         },
         {
           "id": "markdown",
-          "label": "Markdown-Dokument",
-          "description": "Gut lesbar, aber fehleranfälliger für automatische Zustandsänderungen."
+          "label": "Markdown document",
+          "description": "Easy to read but more error-prone for automatic state changes."
         },
         {
           "id": "sqlite",
-          "label": "SQLite-Datei",
-          "description": "Robust für viele Knoten und Abfragen, für den MVP unnötig schwer."
+          "label": "SQLite database",
+          "description": "Robust for many nodes and queries, but unnecessarily heavy for the MVP."
         },
         {
           "id": "ui",
-          "label": "Nur in der Visualisierung",
-          "description": "Kein zusätzlicher Speicher, aber nach einem neuen Turn nicht zuverlässig."
+          "label": "Visualization only",
+          "description": "No extra storage, but unreliable across later tasks."
         }
       ],
       "choice": "json",
-      "reason": "Die Visualisierung bleibt eine austauschbare Ansicht.",
+      "reason": "The visualization remains a replaceable view.",
       "confidence": 0.97,
       "reversible": true,
       "dependsOn": [
@@ -74,27 +74,27 @@
     },
     {
       "id": "integration",
-      "question": "Wie wird Grill with Docs erweitert?",
+      "question": "How should Grill with Docs be extended?",
       "type": "review",
       "options": [
         {
           "id": "wrapper",
-          "label": "Eigener Orchestrator-Skill",
-          "description": "Ergänzt den vorhandenen Ablauf, ohne dessen Dateien zu verändern."
+          "label": "Dedicated orchestrator skill",
+          "description": "Extends the existing workflow without modifying its files."
         },
         {
           "id": "fork",
-          "label": "Bestehenden Skill forken",
-          "description": "Volle Kontrolle, aber spätere Updates müssen manuell übernommen werden."
+          "label": "Fork the existing skill",
+          "description": "Provides full control, but future updates must be merged manually."
         },
         {
           "id": "plugin",
-          "label": "Als Plugin bündeln",
-          "description": "Sinnvoll für Verteilung mit UI und weiteren Werkzeugen, aktuell mehr Aufwand."
+          "label": "Bundle as a plugin",
+          "description": "Useful for broader distribution with UI and tools, but more work today."
         }
       ],
       "choice": "wrapper",
-      "reason": "Der Original-Skill bleibt unverändert und weiter aktualisierbar.",
+      "reason": "The original skill remains unchanged and independently updateable.",
       "confidence": 0.96,
       "reversible": true,
       "dependsOn": [
@@ -105,32 +105,32 @@
     },
     {
       "id": "gate",
-      "question": "Wann hält der Workflow an?",
+      "question": "When should the workflow stop?",
       "type": "derived",
       "options": [
         {
           "id": "material",
-          "label": "Nur bei wesentlichen Entscheidungen",
-          "description": "Stoppt bei Architektur, Risiko, Kosten oder schwer reversiblen Folgen."
+          "label": "Only for material decisions",
+          "description": "Stops for architecture, risk, cost, or consequences that are hard to reverse."
         },
         {
           "id": "every",
-          "label": "Nach jeder Frage",
-          "description": "Maximale Kontrolle, behält aber den langsamen ursprünglichen Ablauf."
+          "label": "After every question",
+          "description": "Provides maximum control but preserves the slow original workflow."
         },
         {
           "id": "confidence",
-          "label": "Unter einem Sicherheitswert",
-          "description": "Leicht automatisierbar, berücksichtigt Risiko und Reversibilität aber schlecht."
+          "label": "Below a confidence threshold",
+          "description": "Easy to automate, but does not account well for risk or reversibility."
         },
         {
           "id": "phase",
-          "label": "Nur an Phasengrenzen",
-          "description": "Planbarer Rhythmus, kann notwendige Entscheidungen zu spät sichtbar machen."
+          "label": "Only at phase boundaries",
+          "description": "Creates a predictable rhythm but may surface important decisions too late."
         }
       ],
       "choice": "material",
-      "reason": "Folgt direkt aus dem Produktziel.",
+      "reason": "This follows directly from the product goal.",
       "confidence": 1.0,
       "reversible": true,
       "dependsOn": [

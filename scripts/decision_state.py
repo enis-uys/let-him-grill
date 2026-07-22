@@ -152,16 +152,16 @@ def option_label(node: dict, choice: str | None = None) -> str:
     selected = choice if choice is not None else node.get("choice")
     return next(
         (option["label"] for option in node["options"] if option["id"] == selected),
-        "Noch keine Auswahl",
+        "No selection yet",
     )
 
 
 def render_node(node: dict) -> str:
     status_labels = {
-        "auto": "KI-Empfehlung",
+        "auto": "AI recommendation",
         "review": "Review",
-        "human": "Entscheidung nötig",
-        "derived": "Abgeleitet",
+        "human": "Decision required",
+        "derived": "Derived",
     }
     color = {
         "auto": "var(--viz-series-1)",
@@ -173,27 +173,27 @@ def render_node(node: dict) -> str:
     for option in node["options"]:
         selected = option["id"] == node.get("choice")
         label = html.escape(option["label"])
-        description = html.escape(option.get("description") or "Keine weitere Beschreibung.")
+        description = html.escape(option.get("description") or "No additional description.")
         control_id = html.escape(f"gwd-{node['id']}-{option['id']}")
         description_id = f"{control_id}-description"
         option_buttons.append(
             f'<div class="gwd-option">'
             f'<input id="{control_id}" type="radio" class="form-check-input" name="gwd-{html.escape(node["id"])}" '
             f'data-node="{html.escape(node["id"])}" data-option="{html.escape(option["id"])}"'
-            f' aria-label="Option auswählen: {label}"'
+            f' aria-label="Select option: {label}"'
             f'{" checked" if selected else ""}>'
             f'<label class="form-check-label gwd-option-title" for="{control_id}">{label}</label>'
             f'<button type="button" class="btn btn-ghost gwd-option-toggle" '
             f'data-option-toggle aria-expanded="false" aria-controls="{description_id}" '
-            f'aria-label="Beschreibung zu {label} anzeigen"><span class="gwd-chevron" aria-hidden="true">›</span></button>'
+            f'aria-label="Show description for {label}"><span class="gwd-chevron" aria-hidden="true">›</span></button>'
             f'<p id="{description_id}" class="text-small text-muted gwd-option-description" data-option-description hidden>{description}</p>'
             f'</div>'
         )
     confidence = node.get("confidence")
-    confidence_text = f"Sicherheit: {round(confidence * 100)} %" if confidence is not None else "Sicherheit: offen"
-    reason = node.get("reason") or "Bewertung steht aus."
-    dependencies = ", ".join(node.get("dependsOn", [])) or "keine"
-    reversibility = "leicht reversibel" if node.get("reversible") else "schwer reversibel"
+    confidence_text = f"Confidence: {round(confidence * 100)}%" if confidence is not None else "Confidence: open"
+    reason = node.get("reason") or "Assessment pending."
+    dependencies = ", ".join(node.get("dependsOn", [])) or "none"
+    reversibility = "easy to reverse" if node.get("reversible") else "hard to reverse"
     return f"""
       <section class="gwd-node" style="--gwd-color: {color}" data-node-card="{html.escape(node['id'])}">
         <div class="gwd-marker" aria-hidden="true"></div>
@@ -203,7 +203,7 @@ def render_node(node: dict) -> str:
               <summary><strong>{html.escape(node['question'])}</strong></summary>
               <div class="gwd-explanation">
                 <p>{html.escape(reason)}</p>
-                <p class="text-small text-muted">Auswahl: {html.escape(option_label(node))} · {confidence_text} · {reversibility} · Abhängigkeiten: {html.escape(dependencies)}</p>
+                <p class="text-small text-muted">Selection: {html.escape(option_label(node))} · {confidence_text} · {reversibility} · Dependencies: {html.escape(dependencies)}</p>
               </div>
             </details>
             <span class="gwd-status"><span class="gwd-status-dot" aria-hidden="true"></span>{status_labels[node['type']]}</span>
@@ -253,15 +253,15 @@ def render_html(state: dict, state_path: Path) -> str:
   <div class="gwd-summary">
     <strong>{html.escape(state.get('title', 'Decision path'))}</strong>
     <div class="viz-row">
-      <span class="text-small text-muted">{len(state['nodes'])} Entscheidungen</span>
-      <button type="button" class="btn btn-ghost" data-expand-all>Alles aufklappen</button>
-      <button type="button" class="btn btn-ghost" data-collapse-all>Alles einklappen</button>
+      <span class="text-small text-muted">{len(state['nodes'])} decisions</span>
+      <button type="button" class="btn btn-ghost" data-expand-all>Expand all</button>
+      <button type="button" class="btn btn-ghost" data-collapse-all>Collapse all</button>
     </div>
   </div>
-  <div class="gwd-tree">{nodes or '<p class="text-muted">Noch keine Entscheidungen.</p>'}</div>
+  <div class="gwd-tree">{nodes or '<p class="text-muted">No decisions yet.</p>'}</div>
   <div class="viz-row gwd-actions">
     <span class="text-small text-muted" data-feedback aria-live="polite"></span>
-    <button type="button" class="btn btn-primary" data-apply disabled>Auswahl anwenden</button>
+    <button type="button" class="btn btn-primary" data-apply disabled>Apply selection</button>
   </div>
   <script>
     (() => {{
@@ -275,7 +275,7 @@ def render_html(state: dict, state_path: Path) -> str:
         input.addEventListener("change", () => {{
           selected = {{ node: input.dataset.node, option: input.dataset.option }};
           apply.disabled = false;
-          feedback.textContent = `Ausgewählt: ${{input.nextElementSibling.textContent}}`;
+          feedback.textContent = `Selected: ${{input.nextElementSibling.textContent}}`;
         }});
       }});
       root.querySelectorAll("[data-option-toggle]").forEach((toggle) => {{
@@ -302,7 +302,7 @@ def render_html(state: dict, state_path: Path) -> str:
         const option = node.options.find((item) => item.id === selected.option);
         const prompt = `Use $let-him-grill. Apply decision "${{node.question}}" = "${{option.label}}" (node ${{selected.node}}, option ${{selected.option}}) to ${{statePath}}, reassess invalidated descendants, continue to the next human gate, and render the updated tree.`;
         if (window.openai?.sendFollowUpMessage) {{
-          await window.openai.sendFollowUpMessage({{ prompt, title: "Entscheidung anwenden" }});
+          await window.openai.sendFollowUpMessage({{ prompt, title: "Apply decision" }});
         }} else {{
           feedback.textContent = prompt;
         }}
