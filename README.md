@@ -4,6 +4,14 @@ An autonomous, evidence-first extension of the Grill with Docs workflow for
 Codex. It resolves safe, reversible decisions on its own and stops when human
 judgment materially changes the outcome.
 
+## Install
+
+```bash
+npx skills add enis-uys/let-him-grill -g -a codex -y
+```
+
+Start a new Codex task after installation, then invoke `$let-him-grill`.
+
 ![Interactive decision tree](docs/screenshot.png)
 
 ## What it adds
@@ -21,9 +29,10 @@ Inspired by Matt Pocock's
 workflow. Let Him Grill is an independent project and is not affiliated with or
 endorsed by Matt Pocock or OpenAI.
 
-## Install
+## Manual installation
 
-Both modes use the same installation. Choose the mode when invoking the skill.
+Use Git as a fallback when the `skills` CLI is unavailable. Both modes use the
+same installation; choose the mode when invoking the skill.
 
 ### Global installation
 
@@ -77,6 +86,22 @@ Use $let-him-grill in visual mode to stress-test this plan.
 Continue autonomously until my decision is required.
 ```
 
+Visual mode uses the Python standard-library backend when available and falls
+back to native Codex file and visualization tools otherwise. To choose
+explicitly:
+
+```text
+Use $let-him-grill in visual mode with the Python backend.
+```
+
+```text
+Use $let-him-grill in visual mode with the native Codex fallback. Do not use
+Python or another runtime.
+```
+
+Codex announces `Visual mode · Python backend` or
+`Visual mode · Native Codex fallback` before the first decision.
+
 ### Automatic mode selection
 
 ```text
@@ -95,9 +120,10 @@ switch modes at any time.
 - Python 3 recommended for deterministic visual state updates
 - no virtual environment, `pip install`, server, or network service
 
-Compact mode works without Python. If Python is unavailable, visual mode can use
-Codex file tools as a fallback, with fewer deterministic checks. Hosts without
-inline visualization support fall back to the same decision content as text.
+Compact mode works without Python. The native visual fallback applies the same
+state and invalidation rules through Codex file tools, but does not have the
+Python backend's executable validation. Hosts without inline visualization
+support fall back to the same decision content as text.
 
 ## Update
 

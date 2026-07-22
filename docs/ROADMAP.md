@@ -16,6 +16,8 @@ user only when a choice materially changes the outcome.
 - [x] Auto-select a clearly superior low-risk option.
 - [x] Create a human gate for meaningful trade-offs.
 - [x] Reassess dependent decisions after an earlier choice changes.
+- [x] Verify the runtime-free visual path from
+      [ticket 004](tickets/004-native-codex-fallback.md) in a fresh Codex task.
 
 Done when one realistic workflow resolves several decisions autonomously, stops
 at a genuine human gate, and correctly rebuilds an affected branch after a
@@ -23,20 +25,22 @@ change.
 
 ## 2. Make installation effortless
 
-- [ ] Put the one-line Codex install command near the top of the README:
+- [x] Put the one-line Codex install command near the top of the README:
 
   ```bash
   npx skills add enis-uys/let-him-grill -g -a codex -y
   ```
 
-- [ ] Keep the Git installation as a fallback.
-- [ ] Verify installation and invocation in a clean environment.
+- [x] Keep the Git installation as a fallback.
+- [x] Verify repository discovery and installation in a clean environment.
+- [x] Verify `$let-him-grill` invocation in a fresh Codex task.
 
 Done when a new user can install and invoke `$let-him-grill` without editing
 files manually.
 
 ## 3. Prove the benefit
 
+- [ ] Complete [ticket 002](tickets/002-benchmark-before-after.md).
 - [ ] Define 5–10 representative planning scenarios.
 - [ ] Compare normal Grill with Docs against Let Him Grill.
 - [ ] Record questions asked, autonomous decisions, human gates, and time to a
@@ -48,6 +52,7 @@ Done when the README can support one concrete claim such as "8 questions became
 
 ## 4. Show the workflow
 
+- [ ] Complete [ticket 003](tickets/003-demo-gif.md).
 - [ ] Record a 15–25 second demo showing autonomous progress, a human gate, and
       switching an earlier option.
 - [ ] Add a compact post-run summary such as:
