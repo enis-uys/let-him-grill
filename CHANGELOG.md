@@ -1,0 +1,39 @@
+# Changelog
+
+All notable user-facing changes to Let Him Grill are recorded here.
+
+## [Unreleased]
+
+### Added
+
+- Decision triage for `auto`, `review`, `human`, `derived`, and `blocked` paths.
+- Option triage for recommended, alternative, situational, discouraged, and
+  excluded choices.
+- Per-option rationale, confidence, reversibility, effort, risk, downstream
+  impact, and preferred conditions.
+- Deterministic auto-selection when exactly one recommendation is low-risk and
+  reversible.
+- Subtle option status accents and expandable assessment details in the visual
+  decision tree.
+- Protection against selecting excluded or invalidated options.
+- Transitive invalidation of dependent decisions and their option assessments.
+
+### Changed
+
+- State format moved to version 2; version 1 state is intentionally unsupported
+  before the first public release.
+- The project and skill were renamed from Grill with Docs Interactive to Let Him
+  Grill.
+- The public example and generated interface now use English labels.
+
+## [0.0.1] - 2026-07-22
+
+Initial pre-release baseline:
+
+- Compact and visual Grill with Docs workflows.
+- Persistent workspace JSON and Markdown export.
+- Interactive Codex decision tree with selectable and expandable options.
+- Transitive invalidation after changing an earlier decision.
+- Python standard-library state engine with no package installation or virtual
+  environment requirement.
+- README, MIT license, product notes, screenshot, examples, and initial tests.
