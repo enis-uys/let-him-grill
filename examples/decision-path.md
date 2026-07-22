@@ -1,29 +1,29 @@
 # Let Him Grill
 
-## Wo lebt der Entscheidungsbaum?
+## Where should the decision tree live?
 
 - Type: `human`
 - Status: `confirmed`
-- Choice: Native Codex-Visualisierung
-- Reason: Direkt im Chat, ohne Server oder zusätzliches Frontend.
+- Choice: Native Codex visualization
+- Reason: It stays in the conversation without a server or separate frontend.
 
-## Wo bleibt der dauerhafte Zustand?
-
-- Type: `review`
-- Status: `recommended`
-- Choice: Workspace-JSON
-- Reason: Die Visualisierung bleibt eine austauschbare Ansicht.
-
-## Wie wird Grill with Docs erweitert?
+## Where should persistent state live?
 
 - Type: `review`
 - Status: `recommended`
-- Choice: Eigener Orchestrator-Skill
-- Reason: Der Original-Skill bleibt unverändert und weiter aktualisierbar.
+- Choice: Workspace JSON
+- Reason: The visualization remains a replaceable view.
 
-## Wann hält der Workflow an?
+## How should Grill with Docs be extended?
+
+- Type: `review`
+- Status: `recommended`
+- Choice: Dedicated orchestrator skill
+- Reason: The original skill remains unchanged and independently updateable.
+
+## When should the workflow stop?
 
 - Type: `derived`
 - Status: `derived`
-- Choice: Nur bei wesentlichen menschlichen Entscheidungen
-- Reason: Folgt direkt aus dem Produktziel.
+- Choice: Only for material decisions
+- Reason: This follows directly from the product goal.
