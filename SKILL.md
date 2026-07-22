@@ -28,13 +28,26 @@ The decision logic and human-gate rules are identical in both modes. Users may
 switch modes at any time. Switching to `visual` materializes known decisions;
 switching to `compact` keeps existing state but stops automatic rendering.
 
+## Backend
+
+Compact mode needs no runtime. For visual mode, honor an explicitly requested
+backend. Otherwise run `python3 --version` once and select:
+
+- `python`: Use `decision_state.py` when Python 3 is available.
+- `native`: Use Codex file and visualization tools when Python 3 is unavailable.
+
+State the selection once as `Visual mode · Python backend` or
+`Visual mode · Native Codex fallback`. If the user explicitly requires Python
+and it is unavailable, stop instead of silently changing backends. Never install
+Python or another runtime without permission.
+
 ## Workflow
 
 1. Read relevant project docs, code, `CONTEXT.md`, and ADRs. Resolve discoverable
    facts with tools instead of asking.
-2. Select the mode. In `visual`, create `.grill/decisions.json` with
-   `decision_state.py init` if no active state exists. In `compact`, keep the
-   path in the conversation until persistence is useful.
+2. Select the mode and backend. In `visual`, create `.grill/decisions.json` with
+   the selected backend if no active state exists. In `compact`, keep the path
+   in the conversation until persistence is useful.
 3. Build the next decision and 2–4 real options. Assess every option as
    `recommended`, `solid-alternative`, `situational`, `not-recommended`, or
    `excluded`. Record a short reason, confidence, reversibility, effort, risk,
@@ -55,16 +68,20 @@ switching to `compact` keeps existing state but stops automatic rendering.
    `blocked`, or shared understanding. For `auto`, allow the script to choose
    only when exactly one `recommended` option is low-risk and reversible. In
    `visual`, add each decision with
-   `decision_state.py add`.
+   `decision_state.py add` with the Python backend or update the state directly
+   with the native backend.
 6. In `compact`, present the human gate as concise text. In `visual`, render the
-   state into the task's writable Codex visualization directory with
-   `decision_state.py render`, then embed it using:
+   state into the exact visualization directory assigned to the current Codex
+   task with `decision_state.py render`. Never reuse a visualization directory
+   from another task or infer it from an earlier artifact. Confirm the rendered
+   file exists in the current task's directory, then embed it using:
 
    `::codex-inline-vis{file="<rendered-filename>.html"}`
 
-7. When a follow-up applies an earlier persisted option, run
-   `decision_state.py choose`. It invalidates all transitive dependants.
-   Re-research and rebuild only those nodes; render again only in `visual`.
+7. When a follow-up applies an earlier persisted option, use
+   `decision_state.py choose` or the native invalidation procedure below. It
+   invalidates all transitive dependants. Re-research and rebuild only those
+   nodes; render again only in `visual`.
 8. Update domain terminology inline through `domain-modeling`. Create an ADR
    only when that skill's three ADR conditions all hold.
 9. Do not implement the discussed plan until the user confirms shared
@@ -119,6 +136,34 @@ python3 <skill-dir>/scripts/decision_state.py export \
 
 Use `--depends-on <id>` once per dependency. Use `--replace` when rebuilding an
 invalidated node with refreshed options or reasoning.
+
+## Native backend
+
+Do not call `python3`, Node.js, a shell renderer, or another runtime. Use Codex
+file tools for all operations:
+
+1. Create version 2 state as `{"version":2,"title":"...","nodes":[]}`.
+2. Before every write, read the complete current state and validate unique node
+   IDs, known dependencies, valid option IDs, one assessment per option, and no
+   selected `excluded` or invalidated option. Use `examples/decisions.json` as
+   the schema example.
+3. For an `auto` node, select only when exactly one option is `recommended`,
+   low-risk, and reversible. Otherwise promote the node to a human gate.
+4. When a choice changes, compute the full transitive descendant set from
+   `dependsOn`. Set every descendant's `choice` and `actor` to `null`, status to
+   `invalidated`, reason to `Earlier dependency changed; reassessment required.`,
+   confidence to `null`, and every option assessment status to `invalidated`.
+5. Apply the complete JSON update in one file edit. Never partially update state.
+6. Create a self-contained HTML visualization directly in the exact
+   visualization directory assigned to the current Codex task. Never reuse a
+   directory from another task or an earlier artifact. Keep option selection,
+   explicit Apply action, expandable decision and option descriptions, Expand
+   all, Collapse all, and a follow-up message that names the state path, node ID,
+   and option ID.
+7. Confirm the HTML file exists in the current task's visualization directory,
+   embed it with `::codex-inline-vis{file="<rendered-filename>.html"}`, and inspect
+   the result before presenting it. If inline visualization tools are
+   unavailable, show the same decision content as compact text.
 
 ## State rules
 

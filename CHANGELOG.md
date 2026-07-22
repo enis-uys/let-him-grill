@@ -17,14 +17,23 @@ All notable user-facing changes to Let Him Grill are recorded here.
   decision tree.
 - Protection against selecting excluded or invalidated options.
 - Transitive invalidation of dependent decisions and their option assessments.
+- Explicit Python and runtime-free native Codex backends for visual mode, with
+  visible backend selection and matching state rules.
 
 ### Changed
 
+- Added the verified one-line `skills` CLI installation as the primary setup
+  path, while retaining Git installation as a fallback.
 - State format moved to version 2; version 1 state is intentionally unsupported
   before the first public release.
 - The project and skill were renamed from Grill with Docs Interactive to Let Him
   Grill.
 - The public example and generated interface now use English labels.
+
+### Fixed
+
+- Native visual rendering now targets and verifies the exact current Codex task
+  directory instead of reusing another task's visualization directory.
 
 ## [0.0.1] - 2026-07-22
 
