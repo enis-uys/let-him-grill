@@ -1,6 +1,6 @@
 # Record the workflow demo
 
-Status: Open
+Status: Done
 
 Depends on: [ticket 002](002-benchmark-before-after.md)
 
@@ -38,3 +38,11 @@ numbers.
   reassessment are all visible.
 - Text remains readable at the README display size.
 - The summary matches the recorded benchmark run.
+
+## Result
+
+The 18-second [demo](../demo.gif) and its [poster frame](../demo-poster.png)
+show the measured scenario 04 path: six decisions evaluated, five resolved
+autonomously, one human gate, then one dependent reassessment. Every frame is
+rendered from the canonical visual template tracked by
+[ticket 005](005-canonical-visual-template.md).

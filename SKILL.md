@@ -108,7 +108,7 @@ Run the bundled script with Python 3 and no third-party dependencies. It needs
 no virtual environment, package install, or lockfile. Check `python3 --version`
 before the first command. If Python 3 is unavailable, do not install it without
 permission; update `.grill/decisions.json` with file tools, apply the same
-transitive invalidation rules, and render the HTML fragment directly.
+transitive invalidation rules, and populate the bundled visual template.
 
 Resolve `<skill-dir>` to the directory containing this `SKILL.md`.
 
@@ -154,13 +154,19 @@ file tools for all operations:
    `invalidated`, reason to `Earlier dependency changed; reassessment required.`,
    confidence to `null`, and every option assessment status to `invalidated`.
 5. Apply the complete JSON update in one file edit. Never partially update state.
-6. Create a self-contained HTML visualization directly in the exact
-   visualization directory assigned to the current Codex task. Never reuse a
-   directory from another task or an earlier artifact. Keep option selection,
-   explicit Apply action, expandable decision and option descriptions, Expand
-   all, Collapse all, and a follow-up message that names the state path, node ID,
-   and option ID.
-7. Confirm the HTML file exists in the current task's visualization directory,
+6. Read `<skill-dir>/assets/decision-tree.html` completely. It is the canonical
+   visual source; never recreate or restyle its HTML, CSS, or JavaScript.
+7. Serialize the complete validated state as JSON and escape every `<` as
+   `\u003c`. Replace the template's single
+   `__LET_HIM_GRILL_STATE_JSON__` placeholder with that JSON object.
+8. Encode the absolute state-file path as a JSON string, escape every `<` as
+   `\u003c`, and replace the single
+   `__LET_HIM_GRILL_STATE_PATH_JSON__` placeholder with that string.
+9. Write the resulting self-contained fragment to the exact visualization
+   directory assigned to the current Codex task. Never reuse a directory from
+   another task or an earlier artifact. Confirm neither `__LET_HIM_GRILL_`
+   placeholder remains; otherwise stop instead of presenting a broken view.
+10. Confirm the HTML file exists in the current task's visualization directory,
    embed it with `::codex-inline-vis{file="<rendered-filename>.html"}`, and inspect
    the result before presenting it. If inline visualization tools are
    unavailable, show the same decision content as compact text.

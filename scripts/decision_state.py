@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import html
 import json
 import sys
 from pathlib import Path
@@ -21,6 +20,7 @@ OPTION_TRIAGES = {
 }
 LEVELS = {"low", "medium", "high"}
 STATE_VERSION = 2
+TEMPLATE = Path(__file__).parent.parent / "assets" / "decision-tree.html"
 
 
 def load(path: Path) -> dict:
@@ -226,220 +226,13 @@ def option_label(node: dict, choice: str | None = None) -> str:
     )
 
 
-def render_node(node: dict) -> str:
-    status_labels = {
-        "auto": "AI recommendation",
-        "review": "Review",
-        "human": "Decision required",
-        "derived": "Derived",
-        "blocked": "Blocked",
-    }
-    color = {
-        "auto": "var(--viz-series-1)",
-        "review": "var(--viz-series-2)",
-        "human": "var(--destructive)",
-        "derived": "var(--muted-foreground)",
-        "blocked": "var(--destructive)",
-    }[node["type"]]
-    triage_labels = {
-        "recommended": "Recommended",
-        "solid-alternative": "Solid alternative",
-        "situational": "Situational",
-        "not-recommended": "Not recommended",
-        "excluded": "Excluded",
-    }
-    triage_colors = {
-        "recommended": "var(--viz-series-1)",
-        "solid-alternative": "var(--viz-series-2)",
-        "situational": "var(--viz-series-3)",
-        "not-recommended": "var(--destructive)",
-        "excluded": "var(--muted-foreground)",
-    }
-    option_buttons = []
-    for option in node["options"]:
-        selected = option["id"] == node.get("choice")
-        label = html.escape(option["label"])
-        description = html.escape(option.get("description") or "No additional description.")
-        assessment = option["assessment"]
-        excluded = assessment["triage"] == "excluded"
-        invalidated = assessment.get("status") == "invalidated"
-        triage = "Needs reassessment" if invalidated else triage_labels[assessment["triage"]]
-        triage_color = "var(--muted-foreground)" if invalidated else triage_colors[assessment["triage"]]
-        assessment_details = (
-            f'<p>{description}</p>'
-            f'<p>{html.escape(assessment["reason"])}</p>'
-            f'<p class="text-small text-muted">Confidence: {round(assessment["confidence"] * 100)}% · '
-            f'Risk: {html.escape(assessment["risk"])} · Effort: {html.escape(assessment["effort"])} · '
-            f'{"easy to reverse" if assessment["reversible"] else "hard to reverse"}</p>'
-            f'<p class="text-small text-muted">Impact: {html.escape(assessment["impact"])} · '
-            f'Prefer when: {html.escape(assessment["preferredWhen"])}</p>'
-        )
-        control_id = html.escape(f"gwd-{node['id']}-{option['id']}")
-        description_id = f"{control_id}-description"
-        option_buttons.append(
-            f'<div class="gwd-option">'
-            f'<input id="{control_id}" type="radio" class="form-check-input" name="gwd-{html.escape(node["id"])}" '
-            f'data-node="{html.escape(node["id"])}" data-option="{html.escape(option["id"])}"'
-            f' aria-label="Select option: {label}"'
-            f'{" disabled" if excluded or invalidated else ""}'
-            f'{" checked" if selected else ""}>'
-            f'<label class="form-check-label gwd-option-title" for="{control_id}">{label} '
-            f'<span class="text-small text-muted gwd-option-triage"><span class="gwd-option-dot" '
-            f'style="--gwd-option-color: {triage_color}" aria-hidden="true"></span>{triage}</span></label>'
-            f'<button type="button" class="btn btn-ghost gwd-option-toggle" '
-            f'data-option-toggle aria-expanded="false" aria-controls="{description_id}" '
-            f'aria-label="Show description for {label}"><span class="gwd-chevron" aria-hidden="true">›</span></button>'
-            f'<div id="{description_id}" class="gwd-option-description" data-option-description hidden>{assessment_details}</div>'
-            f'</div>'
-        )
-    confidence = node.get("confidence")
-    confidence_text = f"Confidence: {round(confidence * 100)}%" if confidence is not None else "Confidence: open"
-    reason = node.get("reason") or "Assessment pending."
-    dependencies = ", ".join(node.get("dependsOn", [])) or "none"
-    reversibility = "easy to reverse" if node.get("reversible") else "hard to reverse"
-    return f"""
-      <section class="gwd-node" style="--gwd-color: {color}" data-node-card="{html.escape(node['id'])}">
-        <div class="gwd-marker" aria-hidden="true"></div>
-        <div class="gwd-content">
-          <div class="gwd-heading">
-            <details class="gwd-details">
-              <summary><strong>{html.escape(node['question'])}</strong></summary>
-              <div class="gwd-explanation">
-                <p>{html.escape(reason)}</p>
-                <p class="text-small text-muted">Selection: {html.escape(option_label(node))} · {confidence_text} · {reversibility} · Dependencies: {html.escape(dependencies)}</p>
-              </div>
-            </details>
-            <span class="gwd-status"><span class="gwd-status-dot" aria-hidden="true"></span>{"Needs reassessment" if node["status"] == "invalidated" else status_labels[node['type']]}</span>
-          </div>
-          <div class="viz-grid gwd-options">{''.join(option_buttons)}</div>
-        </div>
-      </section>"""
-
-
 def render_html(state: dict, state_path: Path) -> str:
-    root_id = "grill-decision-tree"
-    first_invalidated = next(
-        (node["id"] for node in state["nodes"] if node["status"] == "invalidated"),
-        None,
+    template = TEMPLATE.read_text()
+    state_json = json.dumps(state, ensure_ascii=False).replace("<", "\\u003c")
+    path_json = json.dumps(str(state_path.resolve()), ensure_ascii=False).replace("<", "\\u003c")
+    return template.replace("__LET_HIM_GRILL_STATE_JSON__", state_json).replace(
+        "__LET_HIM_GRILL_STATE_PATH_JSON__", path_json
     )
-    reassess_button = (
-        f'<button type="button" class="btn btn-ghost" data-reassess="{html.escape(first_invalidated)}">Reassess path</button>'
-        if first_invalidated else ""
-    )
-    nodes_json = json.dumps(
-        {node["id"]: {"question": node["question"], "options": node["options"]} for node in state["nodes"]},
-        ensure_ascii=False,
-    ).replace("</", "<\\/")
-    nodes = "".join(render_node(node) for node in state["nodes"])
-    escaped_path = json.dumps(str(state_path.resolve()), ensure_ascii=False).replace("</", "<\\/")
-    return f"""<div id="{root_id}">
-  <style>
-    #{root_id} {{ display: grid; gap: 16px; color: var(--foreground); }}
-    #{root_id} .gwd-summary {{ display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }}
-    #{root_id} .gwd-tree {{ display: grid; gap: 0; }}
-    #{root_id} .gwd-node {{ display: grid; grid-template-columns: 20px 1fr; gap: 10px; min-width: 0; }}
-    #{root_id} .gwd-marker {{ width: 8px; height: 8px; margin: 17px 0 0 5px; border-radius: 50%; background: var(--gwd-color); }}
-    #{root_id} .gwd-node:not(:last-child) .gwd-marker::after {{ content: ""; display: block; width: 1px; height: calc(100% + 28px); margin: 8px 0 0 3px; background: var(--border); }}
-    #{root_id} .gwd-content {{ padding: 10px 0 18px; min-width: 0; border-bottom: 1px solid var(--border); }}
-    #{root_id} .gwd-heading {{ display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 8px; }}
-    #{root_id} .gwd-details {{ min-width: 0; }}
-    #{root_id} .gwd-details summary {{ cursor: pointer; }}
-    #{root_id} .gwd-explanation {{ margin-top: 8px; }}
-    #{root_id} .gwd-explanation p {{ margin: 0 0 6px; }}
-    #{root_id} .gwd-status {{ display: inline-flex; align-items: center; gap: 6px; color: var(--muted-foreground); }}
-    #{root_id} .gwd-status-dot {{ width: 7px; height: 7px; border-radius: 50%; background: var(--gwd-color); }}
-    #{root_id} .gwd-options {{ margin-top: 12px; }}
-    #{root_id} .gwd-option {{ display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; min-width: 0; }}
-    #{root_id} .gwd-option-title {{ cursor: pointer; }}
-    #{root_id} .gwd-option-triage {{ display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }}
-    #{root_id} .gwd-option-dot {{ width: 6px; height: 6px; border-radius: 50%; background: var(--gwd-option-color); }}
-    #{root_id} .gwd-option-toggle {{ align-self: center; }}
-    #{root_id} .gwd-chevron {{ display: inline-block; transform: scale(1.3); transition: transform 120ms ease; }}
-    #{root_id} .gwd-option-toggle[aria-expanded="true"] .gwd-chevron {{ transform: rotate(90deg) scale(1.3); }}
-    #{root_id} .gwd-option-description {{ grid-column: 2 / -1; margin: 2px 0 0; }}
-    #{root_id} .gwd-option-description p {{ margin: 0 0 6px; }}
-    #{root_id} .gwd-actions {{ justify-content: flex-end; }}
-    @media (max-width: 480px) {{
-      #{root_id} .gwd-node {{ grid-template-columns: 18px 1fr; }}
-      #{root_id} .gwd-heading {{ grid-template-columns: 1fr; }}
-    }}
-  </style>
-  <div class="gwd-summary">
-    <strong>{html.escape(state.get('title', 'Decision path'))}</strong>
-    <div class="viz-row">
-      <span class="text-small text-muted">{len(state['nodes'])} decisions</span>
-      <button type="button" class="btn btn-ghost" data-expand-all>Expand all</button>
-      <button type="button" class="btn btn-ghost" data-collapse-all>Collapse all</button>
-    </div>
-  </div>
-  <div class="gwd-tree">{nodes or '<p class="text-muted">No decisions yet.</p>'}</div>
-  <div class="viz-row gwd-actions">
-    <span class="text-small text-muted" data-feedback aria-live="polite"></span>
-    {reassess_button}
-    <button type="button" class="btn btn-primary" data-apply disabled>Apply selection</button>
-  </div>
-  <script>
-    (() => {{
-      const root = document.getElementById("{root_id}");
-      const nodes = {nodes_json};
-      const statePath = {escaped_path};
-      const apply = root.querySelector("[data-apply]");
-      const reassess = root.querySelector("[data-reassess]");
-      const feedback = root.querySelector("[data-feedback]");
-      let selected = null;
-      async function sendToCodex(prompt, title, successMessage) {{
-        if (window.openai?.sendFollowUpMessage) {{
-          try {{
-            const result = await window.openai.sendFollowUpMessage({{ prompt, title }});
-            if (result?.isError) throw new Error("Codex rejected the follow-up message.");
-            feedback.textContent = successMessage;
-          }} catch {{
-            feedback.textContent = `Codex connection failed. Copy this prompt: ${{prompt}}`;
-          }}
-        }} else {{
-          feedback.textContent = `Codex connection failed. Copy this prompt: ${{prompt}}`;
-        }}
-      }}
-      root.querySelectorAll("[data-node][data-option]").forEach((input) => {{
-        input.addEventListener("change", () => {{
-          selected = {{ node: input.dataset.node, option: input.dataset.option }};
-          apply.disabled = false;
-          feedback.textContent = `Selected: ${{input.nextElementSibling.textContent}}`;
-        }});
-      }});
-      root.querySelectorAll("[data-option-toggle]").forEach((toggle) => {{
-        toggle.addEventListener("click", () => {{
-          const description = document.getElementById(toggle.getAttribute("aria-controls"));
-          const expanded = toggle.getAttribute("aria-expanded") !== "true";
-          toggle.setAttribute("aria-expanded", String(expanded));
-          description.hidden = !expanded;
-        }});
-      }});
-      root.querySelector("[data-expand-all]").addEventListener("click", () => {{
-        root.querySelectorAll(".gwd-details").forEach((details) => details.open = true);
-        root.querySelectorAll("[data-option-toggle]").forEach((toggle) => toggle.setAttribute("aria-expanded", "true"));
-        root.querySelectorAll("[data-option-description]").forEach((description) => description.hidden = false);
-      }});
-      root.querySelector("[data-collapse-all]").addEventListener("click", () => {{
-        root.querySelectorAll(".gwd-details").forEach((details) => details.open = false);
-        root.querySelectorAll("[data-option-toggle]").forEach((toggle) => toggle.setAttribute("aria-expanded", "false"));
-        root.querySelectorAll("[data-option-description]").forEach((description) => description.hidden = true);
-      }});
-      reassess?.addEventListener("click", async () => {{
-        const prompt = `Use $let-him-grill. Reassess invalidated decision node ${{reassess.dataset.reassess}} and its invalidated descendants in ${{statePath}}, continue to the next human gate, and render the updated tree.`;
-        await sendToCodex(prompt, "Reassess path", "Reassessment sent to Codex.");
-      }});
-      apply.addEventListener("click", async () => {{
-        if (!selected) return;
-        const node = nodes[selected.node];
-        const option = node.options.find((item) => item.id === selected.option);
-        const prompt = `Use $let-him-grill. Apply decision "${{node.question}}" = "${{option.label}}" (node ${{selected.node}}, option ${{selected.option}}) to ${{statePath}}, reassess invalidated descendants, continue to the next human gate, and render the updated tree.`;
-        await sendToCodex(prompt, "Apply decision", "Decision sent to Codex.");
-      }});
-    }})();
-  </script>
-</div>
-"""
 
 
 def command_render(args: argparse.Namespace) -> None:

@@ -6,6 +6,10 @@ All notable user-facing changes to Let Him Grill are recorded here.
 
 ### Added
 
+- One canonical decision-tree template shared by the Python renderer, native
+  Codex fallback, and recorded demo.
+- An 18-second workflow demo and accessible poster frame showing autonomous
+  progress, a human gate, branch invalidation, and reassessment.
 - Reproducible five-scenario workflow benchmark with ten raw transcripts and an
   evidence-backed before-and-after result.
 - Invalidated decision paths now offer a direct Codex reassessment action while
@@ -39,6 +43,8 @@ All notable user-facing changes to Let Him Grill are recorded here.
 
 ### Fixed
 
+- Confirmed human decisions now display as confirmed instead of continuing to
+  appear as decision-required nodes.
 - Native visual rendering now targets and verifies the exact current Codex task
   directory instead of reusing another task's visualization directory.
 

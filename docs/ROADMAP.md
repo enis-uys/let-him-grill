@@ -52,13 +52,15 @@ Done when the README can support one concrete claim such as "8 questions became
 
 ## 4. Show the workflow
 
-- [ ] Complete [ticket 003](tickets/003-demo-gif.md).
-- [ ] Record a 15–25 second demo showing autonomous progress, a human gate, and
+- [x] Complete [ticket 005](tickets/005-canonical-visual-template.md) so the
+      Python backend, native fallback, and demo share one interface.
+- [x] Complete [ticket 003](tickets/003-demo-gif.md).
+- [x] Record a 15–25 second demo showing autonomous progress, a human gate, and
       switching an earlier option.
-- [ ] Add a compact post-run summary such as:
+- [x] Add a compact post-run summary such as:
       `9 decisions evaluated · 7 resolved autonomously · 2 human gates`.
-- [ ] Make the summary easy to copy as Markdown.
-- [ ] Restructure the README around promise, demo, install, before/after,
+- [x] Make the summary easy to copy as Markdown.
+- [x] Restructure the README around promise, demo, install, before/after,
       operation, safety, attribution, and license.
 
 Done when the project can be understood from the README in under one minute.

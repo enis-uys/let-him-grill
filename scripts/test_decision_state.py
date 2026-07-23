@@ -1,4 +1,5 @@
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -7,6 +8,9 @@ from pathlib import Path
 
 
 SCRIPT = Path(__file__).with_name("decision_state.py")
+ROOT = SCRIPT.parent.parent
+TEMPLATE = ROOT / "assets" / "decision-tree.html"
+SKILL = ROOT / "SKILL.md"
 
 
 class DecisionStateTest(unittest.TestCase):
@@ -131,14 +135,13 @@ class DecisionStateTest(unittest.TestCase):
             fragment = rendered.read_text()
             self.assertIn("sendFollowUpMessage", fragment)
             self.assertIn("Architecture?", fragment)
-            self.assertIn("<details", fragment)
             self.assertIn("Thin workflow wrapper", fragment)
             self.assertIn("data-expand-all", fragment)
             self.assertIn("data-option-toggle", fragment)
             self.assertIn("Recommended", fragment)
-            self.assertRegex(fragment, r'id="gwd-storage-json"[^>]* disabled')
-            self.assertRegex(fragment, r'id="gwd-architecture-skill"[^>]* disabled')
-            self.assertEqual(fragment.count('data-reassess="storage"'), 1)
+            self.assertIn('input.disabled = excluded || invalidated', fragment)
+            self.assertIn('const firstInvalidated = state.nodes.find', fragment)
+            self.assertEqual(fragment.count('"status": "invalidated"'), 6)
             self.assertIn("Reassess path", fragment)
             self.assertIn("Reassess invalidated decision", fragment)
 
@@ -167,6 +170,61 @@ class DecisionStateTest(unittest.TestCase):
                 2,
             )
             self.assertNotIn("data-reassess=", fragment)
+
+    def test_render_uses_the_canonical_template_contract(self) -> None:
+        self.assertTrue(TEMPLATE.is_file())
+        template = TEMPLATE.read_text()
+        self.assertEqual(template.count("__LET_HIM_GRILL_STATE_JSON__"), 1)
+        self.assertEqual(template.count("__LET_HIM_GRILL_STATE_PATH_JSON__"), 1)
+
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "state.json"
+            self.run_cli("init", str(state), "--title", "Canonical <template>")
+            self.run_cli(
+                "add", str(state), "--id", "surface", "--question", "Surface?",
+                "--type", "auto", "--option", "native=Native Codex",
+                "--assessment", self.assessment("native"),
+            )
+
+            rendered = Path(directory) / "tree.html"
+            self.run_cli("render", str(state), str(rendered))
+            fragment = rendered.read_text()
+
+            self.assertIn('data-template="let-him-grill-v1"', fragment)
+            self.assertIn('${autonomous} autonomous', fragment)
+            self.assertIn('if (node.status === "confirmed") return "Confirmed"', fragment)
+            self.assertIn(r"Canonical \u003ctemplate>", fragment)
+            self.assertNotIn("Canonical <template>", fragment)
+            self.assertIn(json.dumps(str(state.resolve())), fragment)
+            self.assertNotIn("__LET_HIM_GRILL_", fragment)
+
+        skill = SKILL.read_text()
+        self.assertIn("assets/decision-tree.html", skill)
+        self.assertIn("__LET_HIM_GRILL_STATE_JSON__", skill)
+        self.assertIn("__LET_HIM_GRILL_STATE_PATH_JSON__", skill)
+        self.assertNotIn("sendFollowUpMessage", SCRIPT.read_text())
+
+    def test_render_finds_template_in_an_installed_skill_layout(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            skill = Path(directory) / "let-him-grill"
+            (skill / "scripts").mkdir(parents=True)
+            (skill / "assets").mkdir()
+            shutil.copy2(SCRIPT, skill / "scripts" / SCRIPT.name)
+            shutil.copy2(TEMPLATE, skill / "assets" / TEMPLATE.name)
+            output = Path(directory) / "tree.html"
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(skill / "scripts" / SCRIPT.name),
+                    "render",
+                    str(ROOT / "examples" / "decisions.json"),
+                    str(output),
+                ],
+                check=True,
+            )
+
+            self.assertIn('data-template="let-him-grill-v1"', output.read_text())
 
 
 if __name__ == "__main__":

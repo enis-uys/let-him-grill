@@ -1,0 +1,231 @@
+<div id="grill-decision-tree" data-template="let-him-grill-v1">
+  <style>
+    #grill-decision-tree { display:grid; gap:16px; min-width:0; padding:16px; box-sizing:border-box; background:var(--background, #151515); color:var(--foreground, #f5f5f5); font-family:var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif); }
+    #grill-decision-tree .gwd-summary { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; padding-bottom:10px; border-bottom:1px solid var(--border, #3a3a3a); }
+    #grill-decision-tree .gwd-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    #grill-decision-tree .gwd-muted { color:var(--muted-foreground, #a0a0a0); font-size:.875rem; }
+    #grill-decision-tree .gwd-tree { display:grid; }
+    #grill-decision-tree .gwd-node { display:grid; grid-template-columns:20px minmax(0, 1fr); gap:10px; min-width:0; }
+    #grill-decision-tree .gwd-marker { width:8px; height:8px; margin:17px 0 0 5px; border-radius:50%; background:var(--gwd-color); }
+    #grill-decision-tree .gwd-node:not(:last-child) .gwd-marker::after { content:""; display:block; width:1px; height:calc(100% + 28px); margin:8px 0 0 3px; background:var(--border, #3a3a3a); }
+    #grill-decision-tree .gwd-content { padding:10px 0 18px; min-width:0; border-bottom:1px solid var(--border, #3a3a3a); }
+    #grill-decision-tree .gwd-heading { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:start; gap:8px; }
+    #grill-decision-tree details { min-width:0; }
+    #grill-decision-tree summary { cursor:pointer; }
+    #grill-decision-tree .gwd-explanation { margin-top:8px; }
+    #grill-decision-tree .gwd-explanation p,
+    #grill-decision-tree .gwd-option-description p { margin:0 0 6px; }
+    #grill-decision-tree .gwd-status { display:inline-flex; align-items:center; gap:6px; color:var(--muted-foreground, #a0a0a0); white-space:nowrap; }
+    #grill-decision-tree .gwd-status-dot,
+    #grill-decision-tree .gwd-option-dot { width:7px; height:7px; border-radius:50%; background:var(--gwd-color); flex:none; }
+    #grill-decision-tree .gwd-options { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:10px 18px; margin-top:12px; }
+    #grill-decision-tree .gwd-option { display:grid; grid-template-columns:auto minmax(0, 1fr) auto; align-items:center; gap:6px; min-width:0; }
+    #grill-decision-tree .gwd-option-title { min-width:0; cursor:pointer; }
+    #grill-decision-tree .gwd-option-triage { display:inline-flex; align-items:center; gap:4px; color:var(--muted-foreground, #a0a0a0); font-size:.875rem; white-space:nowrap; }
+    #grill-decision-tree .gwd-option-dot { width:6px; height:6px; background:var(--gwd-option-color); }
+    #grill-decision-tree .gwd-option-toggle,
+    #grill-decision-tree .gwd-button { appearance:none; border:0; border-radius:7px; background:transparent; color:inherit; padding:6px 9px; font:inherit; cursor:pointer; }
+    #grill-decision-tree .gwd-button:hover,
+    #grill-decision-tree .gwd-option-toggle:hover { background:var(--muted, #2b2b2b); }
+    #grill-decision-tree .gwd-button:focus-visible,
+    #grill-decision-tree .gwd-option-toggle:focus-visible,
+    #grill-decision-tree input:focus-visible { outline:2px solid var(--ring, #62aef7); outline-offset:2px; }
+    #grill-decision-tree .gwd-primary { background:var(--primary, #e8e8e8); color:var(--primary-foreground, #171717); }
+    #grill-decision-tree .gwd-primary:hover { filter:brightness(.92); background:var(--primary, #e8e8e8); }
+    #grill-decision-tree button:disabled { cursor:not-allowed; opacity:.45; }
+    #grill-decision-tree .gwd-chevron { display:inline-block; transform:scale(1.3); transition:transform 120ms ease; }
+    #grill-decision-tree .gwd-option-toggle[aria-expanded="true"] .gwd-chevron { transform:rotate(90deg) scale(1.3); }
+    #grill-decision-tree .gwd-option-description { grid-column:2 / -1; margin:2px 0 0; }
+    #grill-decision-tree .gwd-actions { justify-content:flex-end; min-height:34px; }
+    @media (max-width:760px) {
+      #grill-decision-tree .gwd-options { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width:480px) {
+      #grill-decision-tree .gwd-node { grid-template-columns:18px minmax(0, 1fr); }
+      #grill-decision-tree .gwd-heading { grid-template-columns:1fr; }
+      #grill-decision-tree .gwd-options { grid-template-columns:1fr; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      #grill-decision-tree .gwd-chevron { transition:none; }
+    }
+  </style>
+  <div class="gwd-summary">
+    <strong data-title></strong>
+    <div class="gwd-row">
+      <span class="gwd-muted" data-count></span>
+      <button type="button" class="gwd-button" data-expand-all>Expand all</button>
+      <button type="button" class="gwd-button" data-collapse-all>Collapse all</button>
+    </div>
+  </div>
+  <div class="gwd-tree" data-tree></div>
+  <div class="gwd-row gwd-actions">
+    <span class="gwd-muted" data-feedback aria-live="polite"></span>
+    <span data-reassess-slot></span>
+    <button type="button" class="gwd-button gwd-primary" data-apply disabled>Apply selection</button>
+  </div>
+  <script>
+    (() => {
+      const state = __LET_HIM_GRILL_STATE_JSON__;
+      const statePath = __LET_HIM_GRILL_STATE_PATH_JSON__;
+      const root = document.getElementById("grill-decision-tree");
+      const tree = root.querySelector("[data-tree]");
+      const apply = root.querySelector("[data-apply]");
+      const feedback = root.querySelector("[data-feedback]");
+      const statusLabels = { auto:"AI recommendation", review:"Review", human:"Decision required", derived:"Derived", blocked:"Blocked" };
+      const statusColors = { auto:"var(--viz-series-1, #62aef7)", review:"var(--viz-series-2, #ff9a52)", human:"var(--destructive, #ff6868)", derived:"var(--muted-foreground, #a0a0a0)", blocked:"var(--destructive, #ff6868)" };
+      const triageLabels = { recommended:"Recommended", "solid-alternative":"Solid alternative", situational:"Situational", "not-recommended":"Not recommended", excluded:"Excluded" };
+      const triageColors = { recommended:"var(--viz-series-1, #62aef7)", "solid-alternative":"var(--viz-series-2, #ff9a52)", situational:"var(--viz-series-3, #54d18b)", "not-recommended":"var(--destructive, #ff6868)", excluded:"var(--muted-foreground, #a0a0a0)" };
+      let selected = null;
+
+      function element(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+      }
+      function choiceLabel(node) {
+        return node.options.find((option) => option.id === node.choice)?.label || "No selection yet";
+      }
+      function nodeStatusLabel(node) {
+        if (node.status === "invalidated") return "Needs reassessment";
+        if (node.status === "confirmed") return "Confirmed";
+        return statusLabels[node.type];
+      }
+      function renderOption(node, option) {
+        const assessment = option.assessment;
+        const invalidated = assessment.status === "invalidated";
+        const excluded = assessment.triage === "excluded";
+        const row = element("div", "gwd-option");
+        const input = element("input");
+        const controlId = `gwd-${node.id}-${option.id}`;
+        input.id = controlId;
+        input.type = "radio";
+        input.name = `gwd-${node.id}`;
+        input.dataset.node = node.id;
+        input.dataset.option = option.id;
+        input.setAttribute("aria-label", `Select option: ${option.label}`);
+        input.disabled = excluded || invalidated;
+        input.checked = option.id === node.choice;
+        const label = element("label", "gwd-option-title", `${option.label} `);
+        label.htmlFor = controlId;
+        const triage = element("span", "gwd-option-triage");
+        const optionDot = element("span", "gwd-option-dot");
+        optionDot.setAttribute("aria-hidden", "true");
+        optionDot.style.setProperty("--gwd-option-color", invalidated ? "var(--muted-foreground, #a0a0a0)" : triageColors[assessment.triage]);
+        triage.append(optionDot, invalidated ? "Needs reassessment" : triageLabels[assessment.triage]);
+        label.append(triage);
+        const descriptionId = `${controlId}-description`;
+        const toggle = element("button", "gwd-option-toggle");
+        toggle.type = "button";
+        toggle.dataset.optionToggle = "";
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-controls", descriptionId);
+        toggle.setAttribute("aria-label", `Show description for ${option.label}`);
+        const chevron = element("span", "gwd-chevron", "›");
+        chevron.setAttribute("aria-hidden", "true");
+        toggle.append(chevron);
+        const description = element("div", "gwd-option-description");
+        description.id = descriptionId;
+        description.dataset.optionDescription = "";
+        description.hidden = true;
+        description.append(
+          element("p", "", option.description || "No additional description."),
+          element("p", "", assessment.reason),
+          element("p", "gwd-muted", `Confidence: ${Math.round(assessment.confidence * 100)}% · Risk: ${assessment.risk} · Effort: ${assessment.effort} · ${assessment.reversible ? "easy to reverse" : "hard to reverse"}`),
+          element("p", "gwd-muted", `Impact: ${assessment.impact} · Prefer when: ${assessment.preferredWhen}`),
+        );
+        input.addEventListener("change", () => {
+          selected = { node:node.id, option:option.id };
+          apply.disabled = false;
+          feedback.textContent = `Selected: ${option.label}`;
+        });
+        toggle.addEventListener("click", () => {
+          const expanded = toggle.getAttribute("aria-expanded") !== "true";
+          toggle.setAttribute("aria-expanded", String(expanded));
+          description.hidden = !expanded;
+        });
+        row.append(input, label, toggle, description);
+        return row;
+      }
+      function renderNode(node) {
+        const card = element("section", "gwd-node");
+        card.dataset.nodeCard = node.id;
+        card.style.setProperty("--gwd-color", node.status === "confirmed" ? "var(--viz-series-3, #54d18b)" : statusColors[node.type]);
+        const marker = element("div", "gwd-marker");
+        marker.setAttribute("aria-hidden", "true");
+        const content = element("div", "gwd-content");
+        const heading = element("div", "gwd-heading");
+        const details = element("details");
+        const summary = element("summary");
+        summary.append(element("strong", "", node.question));
+        const explanation = element("div", "gwd-explanation");
+        const dependencies = node.dependsOn.length ? node.dependsOn.join(", ") : "none";
+        const confidence = node.confidence === null ? "Confidence: open" : `Confidence: ${Math.round(node.confidence * 100)}%`;
+        explanation.append(
+          element("p", "", node.reason || "Assessment pending."),
+          element("p", "gwd-muted", `Selection: ${choiceLabel(node)} · ${confidence} · ${node.reversible ? "easy to reverse" : "hard to reverse"} · Dependencies: ${dependencies}`),
+        );
+        details.append(summary, explanation);
+        const status = element("span", "gwd-status");
+        const statusDot = element("span", "gwd-status-dot");
+        statusDot.setAttribute("aria-hidden", "true");
+        status.append(statusDot, nodeStatusLabel(node));
+        heading.append(details, status);
+        const options = element("div", "gwd-options");
+        node.options.forEach((option) => options.append(renderOption(node, option)));
+        content.append(heading, options);
+        card.append(marker, content);
+        return card;
+      }
+      async function sendToCodex(prompt, title, successMessage) {
+        if (window.openai?.sendFollowUpMessage) {
+          try {
+            const result = await window.openai.sendFollowUpMessage({ prompt, title });
+            if (result?.isError) throw new Error("Codex rejected the follow-up message.");
+            feedback.textContent = successMessage;
+          } catch {
+            feedback.textContent = `Codex connection failed. Copy this prompt: ${prompt}`;
+          }
+        } else {
+          feedback.textContent = `Codex connection failed. Copy this prompt: ${prompt}`;
+        }
+      }
+
+      root.querySelector("[data-title]").textContent = state.title || "Decision path";
+      const autonomous = state.nodes.filter((node) => node.type !== "human" && node.choice).length;
+      const humanGates = state.nodes.filter((node) => node.type === "human").length;
+      root.querySelector("[data-count]").textContent = `${state.nodes.length} decisions · ${autonomous} autonomous · ${humanGates} human ${humanGates === 1 ? "gate" : "gates"}`;
+      if (state.nodes.length) state.nodes.forEach((node) => tree.append(renderNode(node)));
+      else tree.append(element("p", "gwd-muted", "No decisions yet."));
+
+      const firstInvalidated = state.nodes.find((node) => node.status === "invalidated");
+      if (firstInvalidated) {
+        const reassess = element("button", "gwd-button", "Reassess path");
+        reassess.type = "button";
+        reassess.dataset.reassess = firstInvalidated.id;
+        reassess.addEventListener("click", async () => {
+          const prompt = `Use $let-him-grill. Reassess invalidated decision node ${firstInvalidated.id} and its invalidated descendants in ${statePath}, continue to the next human gate, and render the updated tree.`;
+          await sendToCodex(prompt, "Reassess path", "Reassessment sent to Codex.");
+        });
+        root.querySelector("[data-reassess-slot]").append(reassess);
+      }
+      root.querySelector("[data-expand-all]").addEventListener("click", () => {
+        root.querySelectorAll("details").forEach((details) => details.open = true);
+        root.querySelectorAll("[data-option-toggle]").forEach((toggle) => toggle.setAttribute("aria-expanded", "true"));
+        root.querySelectorAll("[data-option-description]").forEach((description) => description.hidden = false);
+      });
+      root.querySelector("[data-collapse-all]").addEventListener("click", () => {
+        root.querySelectorAll("details").forEach((details) => details.open = false);
+        root.querySelectorAll("[data-option-toggle]").forEach((toggle) => toggle.setAttribute("aria-expanded", "false"));
+        root.querySelectorAll("[data-option-description]").forEach((description) => description.hidden = true);
+      });
+      apply.addEventListener("click", async () => {
+        if (!selected) return;
+        const node = state.nodes.find((item) => item.id === selected.node);
+        const option = node.options.find((item) => item.id === selected.option);
+        const prompt = `Use $let-him-grill. Apply decision "${node.question}" = "${option.label}" (node ${selected.node}, option ${selected.option}) to ${statePath}, reassess invalidated descendants, continue to the next human gate, and render the updated tree.`;
+        await sendToCodex(prompt, "Apply decision", "Decision sent to Codex.");
+      });
+    })();
+  </script>
+</div>

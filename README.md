@@ -4,9 +4,12 @@ An autonomous, evidence-first extension of the Grill with Docs workflow for
 Codex. It resolves safe, reversible decisions on its own and stops when human
 judgment materially changes the outcome.
 
-In five paired planning runs, individual questions fell from 66 to 1 and median
-time to a usable plan from 455 to 54 seconds. See the
-[protocol, raw transcripts, and limitations](docs/benchmark/RESULTS.md).
+## Demo
+
+![Let Him Grill resolves reversible choices, stops at a human gate, then invalidates and reassesses a dependent branch after an earlier choice changes.](docs/demo.gif)
+
+Six decisions evaluated · five resolved autonomously · one human gate. The
+[poster frame](docs/demo-poster.png) provides a static alternative.
 
 ## Install
 
@@ -16,9 +19,13 @@ npx skills add enis-uys/let-him-grill -g -a codex -y
 
 Start a new Codex task after installation, then invoke `$let-him-grill`.
 
-![Interactive decision tree](docs/screenshot.png)
+## Before and after
 
-## What it adds
+In five paired planning runs, individual questions fell from 66 to 1 and median
+time to a usable plan from 455 to 54 seconds. See the
+[protocol, raw transcripts, and limitations](docs/benchmark/RESULTS.md).
+
+## How it works
 
 - researches repository code and documentation before asking questions
 - recommends an answer for every real decision
@@ -27,11 +34,6 @@ Start a new Codex task after installation, then invoke `$let-him-grill`.
 - stops at architecture, product, security, cost, and other human gates
 - invalidates dependent decisions when an earlier choice changes
 - supports compact text output and a persistent interactive decision tree
-
-Inspired by Matt Pocock's
-[Grill with Docs](https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs)
-workflow. Let Him Grill is an independent project and is not affiliated with or
-endorsed by Matt Pocock or OpenAI.
 
 ## Manual installation
 
@@ -91,8 +93,9 @@ Continue autonomously until my decision is required.
 ```
 
 Visual mode uses the Python standard-library backend when available and falls
-back to native Codex file and visualization tools otherwise. To choose
-explicitly:
+back to native Codex file and visualization tools otherwise. Both backends
+populate the same bundled HTML template, so the interface does not change with
+the renderer. To choose explicitly:
 
 ```text
 Use $let-him-grill in visual mode with the Python backend.
@@ -117,7 +120,7 @@ Codex chooses compact mode for short linear discussions and visual mode for
 branching or revisitable decisions. It states the selected mode once. You can
 switch modes at any time.
 
-## Requirements
+## Safety and requirements
 
 - Codex with skill support
 - Git for the installation commands above
@@ -153,6 +156,13 @@ python3 scripts/test_decision_state.py
 The state engine uses only the Python standard library.
 See the [roadmap](docs/ROADMAP.md) for the prioritized path to the first release.
 User-facing changes are tracked in the [changelog](CHANGELOG.md).
+
+## Attribution
+
+Inspired by Matt Pocock's
+[Grill with Docs](https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs)
+workflow. Let Him Grill is an independent project and is not affiliated with or
+endorsed by Matt Pocock or OpenAI.
 
 ## License
 
