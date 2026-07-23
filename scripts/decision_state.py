@@ -262,8 +262,9 @@ def render_node(node: dict) -> str:
         description = html.escape(option.get("description") or "No additional description.")
         assessment = option["assessment"]
         excluded = assessment["triage"] == "excluded"
-        triage = "Needs reassessment" if assessment.get("status") == "invalidated" else triage_labels[assessment["triage"]]
-        triage_color = "var(--muted-foreground)" if assessment.get("status") == "invalidated" else triage_colors[assessment["triage"]]
+        invalidated = assessment.get("status") == "invalidated"
+        triage = "Needs reassessment" if invalidated else triage_labels[assessment["triage"]]
+        triage_color = "var(--muted-foreground)" if invalidated else triage_colors[assessment["triage"]]
         assessment_details = (
             f'<p>{description}</p>'
             f'<p>{html.escape(assessment["reason"])}</p>'
@@ -280,7 +281,7 @@ def render_node(node: dict) -> str:
             f'<input id="{control_id}" type="radio" class="form-check-input" name="gwd-{html.escape(node["id"])}" '
             f'data-node="{html.escape(node["id"])}" data-option="{html.escape(option["id"])}"'
             f' aria-label="Select option: {label}"'
-            f'{" disabled" if excluded else ""}'
+            f'{" disabled" if excluded or invalidated else ""}'
             f'{" checked" if selected else ""}>'
             f'<label class="form-check-label gwd-option-title" for="{control_id}">{label} '
             f'<span class="text-small text-muted gwd-option-triage"><span class="gwd-option-dot" '
@@ -317,6 +318,14 @@ def render_node(node: dict) -> str:
 
 def render_html(state: dict, state_path: Path) -> str:
     root_id = "grill-decision-tree"
+    first_invalidated = next(
+        (node["id"] for node in state["nodes"] if node["status"] == "invalidated"),
+        None,
+    )
+    reassess_button = (
+        f'<button type="button" class="btn btn-ghost" data-reassess="{html.escape(first_invalidated)}">Reassess path</button>'
+        if first_invalidated else ""
+    )
     nodes_json = json.dumps(
         {node["id"]: {"question": node["question"], "options": node["options"]} for node in state["nodes"]},
         ensure_ascii=False,
@@ -366,6 +375,7 @@ def render_html(state: dict, state_path: Path) -> str:
   <div class="gwd-tree">{nodes or '<p class="text-muted">No decisions yet.</p>'}</div>
   <div class="viz-row gwd-actions">
     <span class="text-small text-muted" data-feedback aria-live="polite"></span>
+    {reassess_button}
     <button type="button" class="btn btn-primary" data-apply disabled>Apply selection</button>
   </div>
   <script>
@@ -374,8 +384,22 @@ def render_html(state: dict, state_path: Path) -> str:
       const nodes = {nodes_json};
       const statePath = {escaped_path};
       const apply = root.querySelector("[data-apply]");
+      const reassess = root.querySelector("[data-reassess]");
       const feedback = root.querySelector("[data-feedback]");
       let selected = null;
+      async function sendToCodex(prompt, title, successMessage) {{
+        if (window.openai?.sendFollowUpMessage) {{
+          try {{
+            const result = await window.openai.sendFollowUpMessage({{ prompt, title }});
+            if (result?.isError) throw new Error("Codex rejected the follow-up message.");
+            feedback.textContent = successMessage;
+          }} catch {{
+            feedback.textContent = `Codex connection failed. Copy this prompt: ${{prompt}}`;
+          }}
+        }} else {{
+          feedback.textContent = `Codex connection failed. Copy this prompt: ${{prompt}}`;
+        }}
+      }}
       root.querySelectorAll("[data-node][data-option]").forEach((input) => {{
         input.addEventListener("change", () => {{
           selected = {{ node: input.dataset.node, option: input.dataset.option }};
@@ -401,22 +425,16 @@ def render_html(state: dict, state_path: Path) -> str:
         root.querySelectorAll("[data-option-toggle]").forEach((toggle) => toggle.setAttribute("aria-expanded", "false"));
         root.querySelectorAll("[data-option-description]").forEach((description) => description.hidden = true);
       }});
+      reassess?.addEventListener("click", async () => {{
+        const prompt = `Use $let-him-grill. Reassess invalidated decision node ${{reassess.dataset.reassess}} and its invalidated descendants in ${{statePath}}, continue to the next human gate, and render the updated tree.`;
+        await sendToCodex(prompt, "Reassess path", "Reassessment sent to Codex.");
+      }});
       apply.addEventListener("click", async () => {{
         if (!selected) return;
         const node = nodes[selected.node];
         const option = node.options.find((item) => item.id === selected.option);
         const prompt = `Use $let-him-grill. Apply decision "${{node.question}}" = "${{option.label}}" (node ${{selected.node}}, option ${{selected.option}}) to ${{statePath}}, reassess invalidated descendants, continue to the next human gate, and render the updated tree.`;
-        if (window.openai?.sendFollowUpMessage) {{
-          try {{
-            const result = await window.openai.sendFollowUpMessage({{ prompt, title: "Apply decision" }});
-            if (result?.isError) throw new Error("Codex rejected the follow-up message.");
-            feedback.textContent = "Decision sent to Codex.";
-          }} catch {{
-            feedback.textContent = `Codex connection failed. Copy this prompt: ${{prompt}}`;
-          }}
-        }} else {{
-          feedback.textContent = `Codex connection failed. Copy this prompt: ${{prompt}}`;
-        }}
+        await sendToCodex(prompt, "Apply decision", "Decision sent to Codex.");
       }});
     }})();
   </script>

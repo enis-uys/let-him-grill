@@ -136,6 +136,11 @@ class DecisionStateTest(unittest.TestCase):
             self.assertIn("data-expand-all", fragment)
             self.assertIn("data-option-toggle", fragment)
             self.assertIn("Recommended", fragment)
+            self.assertRegex(fragment, r'id="gwd-storage-json"[^>]* disabled')
+            self.assertRegex(fragment, r'id="gwd-architecture-skill"[^>]* disabled')
+            self.assertEqual(fragment.count('data-reassess="storage"'), 1)
+            self.assertIn("Reassess path", fragment)
+            self.assertIn("Reassess invalidated decision", fragment)
 
     def test_rendered_action_uses_codex_follow_up_bridge_with_safe_fallback(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -154,12 +159,14 @@ class DecisionStateTest(unittest.TestCase):
             fragment = rendered.read_text()
 
             self.assertIn(f"const statePath = {json.dumps(str(state.resolve()))}", fragment)
-            self.assertIn('await window.openai.sendFollowUpMessage({ prompt, title: "Apply decision" })', fragment)
-            self.assertIn('feedback.textContent = "Decision sent to Codex."', fragment)
+            self.assertIn("await window.openai.sendFollowUpMessage({ prompt, title })", fragment)
+            self.assertIn('sendToCodex(prompt, "Apply decision", "Decision sent to Codex.")', fragment)
+            self.assertIn('"Decision sent to Codex."', fragment)
             self.assertEqual(
                 fragment.count('feedback.textContent = `Codex connection failed. Copy this prompt: ${prompt}`'),
                 2,
             )
+            self.assertNotIn("data-reassess=", fragment)
 
 
 if __name__ == "__main__":
