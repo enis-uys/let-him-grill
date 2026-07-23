@@ -2,6 +2,8 @@
 
 - Prefer the smallest correct change and Python standard library over new
   dependencies.
+- Work directly on `main` for now. Do not create branches or worktrees unless
+  the user explicitly requests one.
 - Preserve compact and visual modes unless a task explicitly changes both.
 - Run `python3 scripts/test_decision_state.py` after behavior or state changes.
 - Update `CHANGELOG.md` in the same change for user-visible features, fixes,
