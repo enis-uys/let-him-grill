@@ -40,12 +40,12 @@ files manually.
 
 ## 3. Prove the benefit
 
-- [ ] Complete [ticket 002](tickets/002-benchmark-before-after.md).
-- [ ] Define 5–10 representative planning scenarios.
-- [ ] Compare normal Grill with Docs against Let Him Grill.
-- [ ] Record questions asked, autonomous decisions, human gates, and time to a
+- [x] Complete [ticket 002](tickets/002-benchmark-before-after.md).
+- [x] Define 5–10 representative planning scenarios.
+- [x] Compare normal Grill with Docs against Let Him Grill.
+- [x] Record questions asked, autonomous decisions, human gates, and time to a
       usable plan.
-- [ ] Publish honest aggregate results and raw examples.
+- [x] Publish honest aggregate results and raw examples.
 
 Done when the README can support one concrete claim such as "8 questions became
 2 human gates" without relying on invented or cherry-picked data.
@@ -65,7 +65,7 @@ Done when the project can be understood from the README in under one minute.
 
 ## 5. Prepare the first release
 
-- [ ] Add a small CI check for `python3 scripts/test_decision_state.py`.
+- [x] Add a small CI check for `python3 scripts/test_decision_state.py`.
 - [ ] Remove obsolete or generated repository files.
 - [ ] Add relevant GitHub topics and a social preview image.
 - [ ] Publish `v0.1.0` with the demo and installation command.

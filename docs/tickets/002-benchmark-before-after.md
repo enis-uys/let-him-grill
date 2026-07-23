@@ -1,6 +1,6 @@
 # Benchmark the before-and-after workflow
 
-Status: Open
+Status: Done
 
 ## Goal
 
@@ -34,3 +34,10 @@ Report aggregate results without hiding unfavorable scenarios. Treat
 - Raw results and the aggregation method are available in the repository.
 - The README contains one concise, evidence-backed before-and-after result.
 - No claim is based on an invented or selectively chosen run.
+
+## Protocol
+
+The fixed scenarios, answer keys, raw-transcript format, and aggregation method
+are defined in [the benchmark protocol](../benchmark/README.md). Results remain
+available in [the benchmark report](../benchmark/RESULTS.md), with all ten paired
+raw transcripts linked from its table.

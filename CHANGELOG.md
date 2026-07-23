@@ -6,6 +6,8 @@ All notable user-facing changes to Let Him Grill are recorded here.
 
 ### Added
 
+- Reproducible five-scenario workflow benchmark with ten raw transcripts and an
+  evidence-backed before-and-after result.
 - Invalidated decision paths now offer a direct Codex reassessment action while
   preventing stale options from being selected.
 - Decision triage for `auto`, `review`, `human`, `derived`, and `blocked` paths.

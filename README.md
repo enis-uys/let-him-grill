@@ -4,6 +4,10 @@ An autonomous, evidence-first extension of the Grill with Docs workflow for
 Codex. It resolves safe, reversible decisions on its own and stops when human
 judgment materially changes the outcome.
 
+In five paired planning runs, individual questions fell from 66 to 1 and median
+time to a usable plan from 455 to 54 seconds. See the
+[protocol, raw transcripts, and limitations](docs/benchmark/RESULTS.md).
+
 ## Install
 
 ```bash
