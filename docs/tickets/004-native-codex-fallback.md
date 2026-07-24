@@ -40,3 +40,14 @@ In a fresh Codex task where `python3` is not used:
 - Python and native results have the same decisions, choices, and invalidated
   descendants for the scenario.
 - README examples cover automatic, Python, and native selection.
+
+## Regression evidence
+
+A private-repository smoke test found native synonyms such as `resolved`,
+`provisional`, `open`, `agent`, and `current`. Schema validation now rejects
+those values, and the native instructions list every allowed type, status, actor,
+and option-assessment status explicitly.
+
+After the fix, a fresh private-repository install passed compact, Python visual,
+and native visual smoke tests. Both visual backends rendered the canonical
+decision tree and stopped at the next human gate.

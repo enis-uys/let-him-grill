@@ -48,6 +48,8 @@ def validate(state: dict) -> None:
     for node in state["nodes"]:
         if node.get("type") not in TYPES or node.get("status") not in STATUSES:
             raise SystemExit(f"Invalid type or status on node {node['id']}")
+        if node.get("actor") not in {None, "ai", "human"}:
+            raise SystemExit(f"Invalid actor on node {node['id']}")
         options = node.get("options", [])
         option_ids = [option.get("id") for option in options]
         if (
@@ -62,6 +64,8 @@ def validate(state: dict) -> None:
             assessment = option.get("assessment")
             if not isinstance(assessment, dict):
                 raise SystemExit(f"Missing assessment on option {option.get('id')}")
+            if assessment.get("status") not in {None, "invalidated"}:
+                raise SystemExit(f"Invalid assessment status on option {option['id']}")
             if assessment.get("triage") not in OPTION_TRIAGES:
                 raise SystemExit(f"Invalid triage on option {option['id']}")
             if assessment.get("risk") not in LEVELS or assessment.get("effort") not in LEVELS:

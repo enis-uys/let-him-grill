@@ -142,11 +142,17 @@ invalidated node with refreshed options or reasoning.
 Do not call `python3`, Node.js, a shell renderer, or another runtime. Use Codex
 file tools for all operations:
 
-1. Create version 2 state as `{"version":2,"title":"...","nodes":[]}`.
-2. Before every write, read the complete current state and validate unique node
-   IDs, known dependencies, valid option IDs, one assessment per option, and no
-   selected `excluded` or invalidated option. Use `examples/decisions.json` as
-   the schema example.
+1. Create version 2 state as `{"version":2,"title":"...","nodes":[]}`. Use only
+   these exact schema values; never invent synonyms:
+   - `type`: `auto`, `review`, `human`, `derived`, or `blocked`
+   - `status`: `recommended`, `confirmed`, `pending`, `derived`, or `invalidated`
+   - `actor`: `ai`, `human`, or `null`
+   - option assessment `status`: absent, or `invalidated`
+2. Before every write, read the complete current state and validate those exact
+   value sets, unique node IDs, known dependencies, valid option IDs, one
+   assessment per option, and no selected `excluded` or invalidated option. Use
+   `examples/decisions.json` as the schema example. Stop instead of writing when
+   any field uses an unknown value.
 3. For an `auto` node, select only when exactly one option is `recommended`,
    low-risk, and reversible. Otherwise promote the node to a human gate.
 4. When a choice changes, compute the full transitive descendant set from

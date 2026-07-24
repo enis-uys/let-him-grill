@@ -105,6 +105,37 @@ class DecisionStateTest(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("excluded", result.stderr)
 
+    def test_rejects_native_schema_synonyms(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "state.json"
+            self.run_cli("init", str(state), "--title", "Test")
+            self.run_cli(
+                "add", str(state), "--id", "release", "--question", "Release?",
+                "--type", "auto", "--option", "tag=Tag",
+                "--assessment", self.assessment("tag"),
+            )
+            valid = json.loads(state.read_text())
+            invalid_values = (
+                ("status", "resolved", "Invalid type or status"),
+                ("actor", "agent", "Invalid actor"),
+                ("assessment-status", "current", "Invalid assessment status"),
+            )
+            for field, value, message in invalid_values:
+                with self.subTest(field=field):
+                    candidate = json.loads(json.dumps(valid))
+                    if field == "assessment-status":
+                        candidate["nodes"][0]["options"][0]["assessment"]["status"] = value
+                    else:
+                        candidate["nodes"][0][field] = value
+                    state.write_text(json.dumps(candidate))
+                    result = subprocess.run(
+                        [sys.executable, str(SCRIPT), "render", str(state), str(Path(directory) / "tree.html")],
+                        capture_output=True,
+                        text=True,
+                    )
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(message, result.stderr)
+
     def test_change_invalidates_only_transitive_descendants(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             state = Path(directory) / "state.json"
@@ -202,6 +233,7 @@ class DecisionStateTest(unittest.TestCase):
         self.assertIn("assets/decision-tree.html", skill)
         self.assertIn("__LET_HIM_GRILL_STATE_JSON__", skill)
         self.assertIn("__LET_HIM_GRILL_STATE_PATH_JSON__", skill)
+        self.assertIn("never invent synonyms", skill)
         self.assertNotIn("sendFollowUpMessage", SCRIPT.read_text())
 
     def test_render_finds_template_in_an_installed_skill_layout(self) -> None:

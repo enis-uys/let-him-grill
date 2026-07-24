@@ -43,6 +43,8 @@ All notable user-facing changes to Let Him Grill are recorded here.
 
 ### Fixed
 
+- State validation now rejects native-backend schema synonyms instead of
+  accepting unsupported status and actor values.
 - Confirmed human decisions now display as confirmed instead of continuing to
   appear as decision-required nodes.
 - Native visual rendering now targets and verifies the exact current Codex task

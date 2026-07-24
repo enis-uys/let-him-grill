@@ -68,7 +68,7 @@ Done when the project can be understood from the README in under one minute.
 ## 5. Prepare the first release
 
 - [x] Add a small CI check for `python3 scripts/test_decision_state.py`.
-- [ ] Remove obsolete or generated repository files.
+- [x] Remove obsolete or generated repository files.
 - [ ] Add relevant GitHub topics and a social preview image.
 - [ ] Publish `v0.1.0` with the demo and installation command.
 - [ ] Confirm discoverability through skills.sh.
