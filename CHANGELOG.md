@@ -9,6 +9,13 @@ All notable user-facing changes to Let Him Grill are recorded here.
 - Excalidraw-style workflow overview covering decision triage, human gates, and
   visual rendering in Codex.
 
+### Changed
+
+- Clarified the primary installation requirements and replaced obsolete open
+  product questions with the decisions implemented in `v0.1.0`.
+- Added a confirmed handoff before implementation, including a concise decision
+  summary and reuse of existing canonical project documentation.
+
 ## [0.1.0] - 2026-07-24
 
 ### Added

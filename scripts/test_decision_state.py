@@ -236,6 +236,13 @@ class DecisionStateTest(unittest.TestCase):
         self.assertIn("never invent synonyms", skill)
         self.assertNotIn("sendFollowUpMessage", SCRIPT.read_text())
 
+    def test_skill_requires_a_confirmed_handoff_before_implementation(self) -> None:
+        skill = SKILL.read_text()
+        self.assertIn("summarize confirmed human decisions", skill)
+        self.assertIn("Ask the user to confirm that summary", skill)
+        self.assertIn("Do not implement the discussed plan", skill)
+        self.assertIn("creating a duplicate", skill)
+
     def test_render_finds_template_in_an_installed_skill_layout(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             skill = Path(directory) / "let-him-grill"

@@ -84,8 +84,17 @@ Python or another runtime without permission.
    nodes; render again only in `visual`.
 8. Update domain terminology inline through `domain-modeling`. Create an ADR
    only when that skill's three ADR conditions all hold.
-9. Do not implement the discussed plan until the user confirms shared
-   understanding.
+9. At shared understanding, summarize confirmed human decisions, provisional AI
+   choices, assumptions, remaining risks or blockers, and the ordered
+   implementation plan.
+10. Ask the user to confirm that summary. Do not implement the discussed plan
+    until the user confirms shared understanding.
+11. After confirmation, update an existing canonical planning, specification,
+    or decision document when the repository already has that pattern or the
+    user requested documentation. Update the existing document instead of
+    creating a duplicate. Otherwise keep the implementation plan in the
+    conversation. Keep `CONTEXT.md` limited to domain terminology and create
+    ADRs only under the rules above.
 
 ## Human gate
 

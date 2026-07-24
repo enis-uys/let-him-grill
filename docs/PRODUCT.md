@@ -178,19 +178,16 @@ eigentliche KI-Arbeit bleibt beim ausführenden Agenten.
 - Lokaler, einfacher MVP vor Plattform oder Produktisierung.
 - Mensch bleibt letzte Instanz für wesentliche Entscheidungen.
 - Workspace-JSON ist Source of Truth; die Visualisierung ist nur eine Ansicht.
-
-## Offene Entscheidungen
-
-Vor Implementierung noch anhand der vorhandenen Grill-with-Docs-Skills prüfen:
-
-- Welche konkreten Skills und Ausgabeformate werden integriert?
-- Welche konkreten zusätzlichen Grill-with-Docs-Varianten werden integriert?
-- Soll ein Wechsel einen alten Zweig nur verwerfen oder als lesbare Historie
-  behalten?
-- Wo wird der Skill später installiert: im Projekt oder im persönlichen
-  Codex-Skill-Verzeichnis?
+- Der Skill erweitert `grilling` und `domain-modeling`; weitere
+  Grill-with-Docs-Varianten sind nicht Teil des MVP.
+- Kompakter Text und der persistente visuelle Entscheidungsbaum sind die
+  unterstützten Ausgabeformen.
+- Ein Wechsel verwirft abhängige Entscheidungen im aktuellen Zustand; ältere
+  Codex-Antworten bleiben als historische Momentaufnahmen lesbar.
+- Die globale Installation über `skills` ist der Standard. Git und ein
+  projektlokales Submodul bleiben dokumentierte Alternativen.
 
 ## Nächster Schritt
 
-Skill mit einem realen Planungsproblem vorwärts testen. Dabei besonders prüfen,
-ob Human-Gates weder zu häufig noch zu spät gesetzt werden.
+Projekt veröffentlichen, echtes Nutzerfeedback sammeln und nur wiederkehrende
+Probleme in fokussierte Issues überführen.

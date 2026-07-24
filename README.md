@@ -122,10 +122,21 @@ Codex chooses compact mode for short linear discussions and visual mode for
 branching or revisitable decisions. It states the selected mode once. You can
 switch modes at any time.
 
+### Finishing the grill
+
+At shared understanding, Codex summarizes confirmed human decisions,
+provisional AI choices, assumptions, remaining risks or blockers, and the
+ordered implementation plan. It asks for confirmation before implementation.
+
+After confirmation, it updates an existing canonical planning, specification,
+or decision document when the repository already uses one or documentation was
+requested. It does not create a duplicate plan file by default.
+
 ## Safety and requirements
 
 - Codex with skill support
-- Git for the installation commands above
+- Node.js with `npx` for the primary installation command
+- Git only for the manual installation fallback
 - Python 3 recommended for deterministic visual state updates
 - no virtual environment, `pip install`, server, or network service
 
@@ -156,7 +167,7 @@ python3 scripts/test_decision_state.py
 ```
 
 The state engine uses only the Python standard library.
-See the [roadmap](docs/ROADMAP.md) for the prioritized path to the first release.
+See the [roadmap](docs/ROADMAP.md) for launch and follow-up work.
 User-facing changes are tracked in the [changelog](CHANGELOG.md).
 
 ## Attribution
