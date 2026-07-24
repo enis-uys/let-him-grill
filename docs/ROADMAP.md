@@ -71,7 +71,7 @@ Done when the project can be understood from the README in under one minute.
 - [x] Remove obsolete or generated repository files.
 - [x] Add relevant GitHub topics and a social preview image.
 - [x] Publish `v0.1.0` with the demo and installation command.
-- [ ] Confirm discoverability through skills.sh.
+- [x] Confirm discoverability through skills.sh.
 
 Done when the tagged release installs cleanly and the repository has no known
 setup or documentation blockers.
