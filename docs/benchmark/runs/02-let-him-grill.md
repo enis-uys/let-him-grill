@@ -55,11 +55,11 @@ Before replacement, validate v2:
 - Every chosen dependent node has fresh reassessment evidence from this migration run.
 - Round-trip load succeeds.
 
-Current validation covers much of shape checking but not cycles or full invalidation consistency: [decision_state.py](/Users/enisuysal/Movies/1Code/grill-with-docs-interactive/scripts/decision_state.py:40).
+Current validation covers much of shape checking but not cycles or full invalidation consistency: [`decision_state.py`](../../../scripts/decision_state.py).
 
 3. Required tests
 
-Extend [test_decision_state.py](/Users/enisuysal/Movies/1Code/grill-with-docs-interactive/scripts/test_decision_state.py:104):
+Extend [`test_decision_state.py`](../../../scripts/test_decision_state.py):
 
 - Linear `A → B → C`: changing A invalidates B and C.
 - Diamond graph: every descendant invalidated once; unrelated node preserved.
@@ -100,4 +100,3 @@ Human gate reached: authorization to replace actual workspace state. Options:
 - Excluded: silently load v1 as v2.
 
 Counts: questions asked 0 · autonomous decisions 7 · human gates 1 · reassessments 0.
-
