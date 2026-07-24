@@ -69,8 +69,8 @@ Done when the project can be understood from the README in under one minute.
 
 - [x] Add a small CI check for `python3 scripts/test_decision_state.py`.
 - [x] Remove obsolete or generated repository files.
-- [ ] Add relevant GitHub topics and a social preview image.
-- [ ] Publish `v0.1.0` with the demo and installation command.
+- [x] Add relevant GitHub topics and a social preview image.
+- [x] Publish `v0.1.0` with the demo and installation command.
 - [ ] Confirm discoverability through skills.sh.
 
 Done when the tagged release installs cleanly and the repository has no known

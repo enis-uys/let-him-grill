@@ -4,6 +4,8 @@ All notable user-facing changes to Let Him Grill are recorded here.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-07-24
+
 ### Added
 
 - One canonical decision-tree template shared by the Python renderer, native
