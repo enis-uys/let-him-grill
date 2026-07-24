@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">How Let Him Grill works</title>
+  <desc id="desc">Codex loads the skill and repository evidence, chooses compact or visual mode, resolves safe reversible decisions automatically, pauses at human gates, and renders persistent visual state from decisions.json.</desc>
+  <style>
+    :root { color-scheme: light dark; }
+    .bg { fill: #fffdf8; }
+    .box { fill: #fffdf8; stroke: #343a40; stroke-width: 2.2; }
+    .blue { fill: #e7f5ff; stroke: #1971c2; }
+    .green { fill: #ebfbee; stroke: #2b8a3e; }
+    .orange { fill: #fff4e6; stroke: #e67700; }
+    .violet { fill: #f3f0ff; stroke: #6741d9; }
+    .line { fill: none; stroke: #495057; stroke-width: 2.2; marker-end: url(#arrow); }
+    .loop { stroke: #2b8a3e; stroke-dasharray: 8 7; }
+    text { fill: #212529; font-family: "Comic Sans MS", "Bradley Hand", system-ui, sans-serif; font-size: 17px; }
+    .heading { font-size: 23px; font-weight: 700; }
+    .small { font-size: 14px; fill: #495057; }
+    .center { text-anchor: middle; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #171717; }
+      .box { fill: #202020; stroke: #ced4da; }
+      .blue { fill: #172b3a; stroke: #74c0fc; }
+      .green { fill: #19301f; stroke: #69db7c; }
+      .orange { fill: #352616; stroke: #ffa94d; }
+      .violet { fill: #28213b; stroke: #b197fc; }
+      .line { stroke: #ced4da; }
+      .loop { stroke: #69db7c; }
+      text { fill: #f1f3f5; }
+      .small { fill: #ced4da; }
+    }
+  </style>
+  <defs>
+    <filter id="rough" x="-2%" y="-2%" width="104%" height="104%">
+      <feTurbulence type="fractalNoise" baseFrequency=".015" numOctaves="1" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 10 5 0 10z" fill="context-stroke"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1200" height="720"/>
+  <g filter="url(#rough)">
+    <text class="heading" x="30" y="38">1 · Start in Codex</text>
+    <rect class="box blue" x="30" y="58" width="220" height="76" rx="12"/>
+    <text class="center" x="140" y="88">
+      <tspan x="140">$let-him-grill</tspan>
+      <tspan x="140" dy="25">+ plan / docs</tspan>
+    </text>
+    <path class="line" d="M250 96H310"/>
+    <rect class="box blue" x="310" y="58" width="260" height="76" rx="12"/>
+    <text class="center" x="440" y="87">
+      <tspan x="440">Load SKILL.md</tspan>
+      <tspan x="440" dy="25">inspect repo evidence</tspan>
+    </text>
+
+    <text class="heading" x="660" y="38">2 · Choose presentation mode</text>
+    <path class="line" d="M570 96H645"/>
+    <path class="line" d="M645 96V77H700"/>
+    <path class="line" d="M645 96V147H700"/>
+    <rect class="box violet" x="700" y="48" width="210" height="58" rx="12"/>
+    <text class="center" x="805" y="83">COMPACT · text-first</text>
+    <rect class="box violet" x="700" y="124" width="210" height="58" rx="12"/>
+    <text class="center" x="805" y="159">VISUAL · persistent</text>
+    <text class="small" x="935" y="72">short, linear path</text>
+    <text class="small" x="935" y="148">branching or revisitable</text>
+    <text class="small" x="935" y="170">creates .grill/decisions.json</text>
+
+    <text class="heading" x="30" y="234">3 · Evaluate each real decision</text>
+    <rect class="box orange" x="30" y="258" width="230" height="76" rx="12"/>
+    <text class="center" x="145" y="287">
+      <tspan x="145">Options + evidence</tspan>
+      <tspan x="145" dy="25">fit · risk · effort</tspan>
+    </text>
+    <path class="line" d="M260 296H315"/>
+    <rect class="box orange" x="315" y="248" width="260" height="96" rx="12"/>
+    <text class="center" x="445" y="280">
+      <tspan x="445">Exactly one recommendation?</tspan>
+      <tspan x="445" dy="25">Low risk + reversible?</tspan>
+    </text>
+
+    <path class="line" d="M575 278H650"/>
+    <text class="small" x="600" y="265">yes</text>
+    <rect class="box green" x="650" y="238" width="215" height="76" rx="12"/>
+    <text class="center" x="758" y="267">
+      <tspan x="758">AUTO SELECT</tspan>
+      <tspan x="758" dy="25">persist + continue</tspan>
+    </text>
+    <path class="line" d="M865 276H930"/>
+    <rect class="box green" x="930" y="238" width="220" height="76" rx="12"/>
+    <text class="center" x="1040" y="283">Next decision</text>
+
+    <path class="line" d="M445 344V395"/>
+    <text class="small" x="458" y="374">no / material trade-off</text>
+    <rect class="box orange" x="315" y="395" width="260" height="86" rx="12"/>
+    <text class="center" x="445" y="425">
+      <tspan x="445">HUMAN GATE</tspan>
+      <tspan x="445" dy="25">product · security · cost</tspan>
+    </text>
+    <path class="line" d="M575 438H650"/>
+    <rect class="box orange" x="650" y="395" width="215" height="86" rx="12"/>
+    <text class="center" x="758" y="425">
+      <tspan x="758">Render current tree</tspan>
+      <tspan x="758" dy="25">user chooses</tspan>
+    </text>
+    <path class="line" d="M865 438H930"/>
+    <rect class="box orange" x="930" y="395" width="220" height="86" rx="12"/>
+    <text class="center" x="1040" y="425">
+      <tspan x="1040">Invalidate dependent</tspan>
+      <tspan x="1040" dy="25">decisions + reassess</tspan>
+    </text>
+    <path class="line loop" d="M1040 395V350H1040V314"/>
+
+    <text class="heading" x="30" y="552">4 · Visual rendering in Codex</text>
+    <rect class="box blue" x="30" y="575" width="235" height="82" rx="12"/>
+    <text class="center" x="148" y="604">
+      <tspan x="148">Python backend</tspan>
+      <tspan x="148" dy="24">or native Codex tools</tspan>
+    </text>
+    <path class="line" d="M265 616H310"/>
+    <rect class="box violet" x="310" y="575" width="240" height="82" rx="12"/>
+    <text class="center" x="430" y="604">
+      <tspan x="430">Source of truth</tspan>
+      <tspan x="430" dy="24">.grill/decisions.json</tspan>
+    </text>
+    <path class="line" d="M550 616H595"/>
+    <rect class="box blue" x="595" y="575" width="250" height="82" rx="12"/>
+    <text class="center" x="720" y="604">
+      <tspan x="720">Render self-contained HTML</tspan>
+      <tspan x="720" dy="24">into current task directory</tspan>
+    </text>
+    <path class="line" d="M845 616H890"/>
+    <rect class="box green" x="890" y="575" width="260" height="82" rx="12"/>
+    <text class="center" x="1020" y="604">
+      <tspan x="1020">::codex-inline-vis</tspan>
+      <tspan x="1020" dy="24">embeds the decision tree</tspan>
+    </text>
+    <text class="small" x="30" y="694">Compact mode needs no runtime. Visual mode recommends Python 3, but has a runtime-free native Codex fallback.</text>
+  </g>
+</svg>

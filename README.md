@@ -27,6 +27,8 @@ time to a usable plan from 455 to 54 seconds. See the
 
 ## How it works
 
+![Excalidraw-style overview of the Let Him Grill decision and Codex rendering workflow.](docs/how-it-works.svg)
+
 - researches repository code and documentation before asking questions
 - recommends an answer for every real decision
 - triages every option by fit, risk, effort, and reversibility
